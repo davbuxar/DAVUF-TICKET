@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3730a3">
-<title>DAVUF Ticket Details Bihar Zone - J (Buxar)</title>
+<title>DAV UF -2026 Tickets</title>
 <link rel="icon" href="https://davrecruit.davcmc.in/CBT/logo.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -115,7 +115,23 @@ td select{border-color:rgba(139,92,246,.5);min-width:96px}
 .wb h3{font-size:20px;margin-bottom:4px}.wb p{color:var(--mut);font-size:12.5px;margin-bottom:14px}
 .cf{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;z-index:101;animation:cf 1.8s ease-in forwards;pointer-events:none}
 @keyframes cf{to{transform:translateY(105vh) rotate(720deg);opacity:.9}}
-.sch{position:sticky;left:0;z-index:1;font-weight:600;min-width:110px;max-width:140px;background:#e0f2fe}[data-t=dark] .sch{background:#12324a}</style>
+.sch{position:sticky;left:0;z-index:1;font-weight:600;min-width:110px;max-width:140px;background:#e0f2fe}[data-t=dark] .sch{background:#12324a}
+body{background:radial-gradient(900px 400px at 0 0,rgba(99,102,241,.16),transparent),radial-gradient(800px 400px at 100% 20%,rgba(236,72,153,.12),transparent),var(--bg);background-attachment:fixed}
+.hero{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;color:#fff;padding:18px;border-radius:22px;margin-bottom:12px;background:linear-gradient(120deg,#4338ca,#7c3aed,#db2777);box-shadow:var(--sh);position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-30px;top:-40px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.14)}
+.hero h2{font-size:18px}.hero p{opacity:.9;font-size:12px}.hs{font-size:11px;opacity:.95;z-index:1}.hs b{display:block;font-size:13px}
+.dcard{padding:0!important;overflow:hidden}.dcard .tw{border:0;border-radius:0}
+.dban{color:#fff;font-weight:700;padding:12px 16px;font-size:15px;letter-spacing:.2px}
+.st th{background:rgba(79,70,229,.9);font-size:12px}.st td{padding:9px 6px}.st tbody tr:hover td{filter:brightness(.97)}
+.dtc{font-weight:700;font-size:13px;writing-mode:horizontal-tb;min-width:78px}
+.st .inp{font-size:16px;font-weight:700;padding:10px 4px;border-radius:12px;border-width:2px}
+.st .inp:disabled{opacity:.4}
+.sub td{font-weight:700;background:linear-gradient(90deg,rgba(79,70,229,.18),rgba(236,72,153,.14))!important}
+.shake{animation:sk .4s;border-color:#ef4444!important}@keyframes sk{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.sbar{position:sticky;bottom:calc(68px + env(safe-area-inset-bottom));z-index:15;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:20px;background:var(--card);border:1px solid var(--bd);box-shadow:0 10px 30px rgba(79,70,229,.25)}
+.gtt{font-size:12px;color:var(--mut)}.gtt b{color:var(--p);font-size:17px;margin-left:4px}.gtt span{margin-left:12px}
+@media(min-width:760px){.sbar{bottom:14px}}
+</style>
 </head>
 <body>
 
@@ -155,7 +171,7 @@ td select{border-color:rgba(139,92,246,.5);min-width:96px}
 
 <script>
 /* ====== SETTINGS ====== */
-const API_URL = ("https://script.google.com/macros/s/AKfycbzRJoFzQGQ9LBmQjv4jRRzRtS1ufyAvUsm7PCFWmoNpfBxdM7QkGsmDp99fB7qFDCvs/exec".match(/https:\/\/script\.google\.com\/macros\/s\/[^\/\s"]+\/exec/) || [""])[0];   // paste your Web App URL between the quotes
+const API_URL = ("https://script.google.com/macros/s/AKfycbwa3ny5bqOYXTiZM3Nd0ITpKRQLW-X79MUFkHzaP9UHPq7c5uM_myRhfGHZ4JQs-FNi/exec".match(/https:\/\/script\.google\.com\/macros\/s\/[^\/\s"]+\/exec/) || [""])[0];   // paste your Web App URL between the quotes
 const DEMO = !API_URL;
 /* ====================== */
 const $ = s => document.querySelector(s);
@@ -277,7 +293,7 @@ async function login() {
 async function enter() {
   $('#login').hidden = true; $('#app').hidden = false;
   $('#hName').textContent = S.user.name; $('#hSchool').textContent = (isAdmin() ? 'Administrator · all schools' : S.user.school);
-  wait(true, 'Loading your data'); await reload(); wait(false); show('dash');
+  $('#nav').hidden = isAdmin(); wait(true, 'Loading your data'); await reload(); wait(false); show('dash');
 }
 async function reload() {
   const r = await api('load', {name:S.user.name, pin:S.pin});
@@ -330,27 +346,36 @@ function dashboard() {
 
 /* ---------- ticket sales entry ---------- */
 function salesView() {
-  const mine = S.sales.filter(own), rows = [];
-  S.cfg.dates.forEach(d => S.cfg.categories.forEach(c => {
+  const mine = S.sales.filter(own);
+  const GR = ['linear-gradient(135deg,#0ea5e9,#6366f1)', 'linear-gradient(135deg,#8b5cf6,#ec4899)', 'linear-gradient(135deg,#f59e0b,#ef4444)', 'linear-gradient(135deg,#10b981,#06b6d4)'];
+  const D = S.cfg.dates.map(d => ({d, rows:S.cfg.categories.map(c => {
     const rec = sum(S.alloc.filter(x => own(x) && x.date === d && x.category === c.category), x => x.received);
     const s = mine.find(x => x.date === d && x.category === c.category);
-    rows.push({d, c:c.category, p:num(c.price), rec, sold:s ? s.sold : ''});
-  }));
-  $('#pane').innerHTML = `<div class="card"><h2>🎟️ Ticket sales entry</h2>
-   <p class="meta">Enter total tickets sold. “Received” comes from the sheet; “Stock” is calculated. You can edit and save any number of times · Last saved: ${lastTs(mine)}</p>
-   <div class="tw"><table id="st"><thead><tr><th>Event date</th><th>Category</th><th>Received</th><th>Total sale</th><th>In stock</th><th>Amount</th></tr></thead><tbody>
-   ${rows.map(x => `<tr data-d="${x.d}" data-c="${x.c}" data-r="${x.rec}" data-p="${x.p}"><td class="c-d">${x.d}</td><td>${chip(x.c)}<br><small>${INR(x.p)}</small></td><td class="c-r">${x.rec}</td>
-    <td class="c-s"><input class="inp" inputmode="numeric" maxlength="6" value="${x.sold}" placeholder="0"></td><td class="c-k"></td><td class="c-a"></td></tr>`).join('')}
-   </tbody><tfoot><tr><td colspan="2">Total</td><td id="tr"></td><td id="ts"></td><td id="tk"></td><td id="ta"></td></tr></tfoot></table></div>
-   <div class="row"><button class="btn" id="sv">💾 Save sales</button></div></div>`;
-  const calc = () => { let a = 0, b = 0, c = 0, d = 0;
-    document.querySelectorAll('#st tbody tr').forEach(tr => { const r = +tr.dataset.r, p = +tr.dataset.p, s = num(tr.querySelector('input').value), k = r - s;
-      tr.children[4].textContent = k; tr.children[4].classList.toggle('neg', k < 0); tr.children[5].textContent = INR(s * p); a += r; b += s; c += k; d += s * p; });
-    $('#tr').textContent = a; $('#ts').textContent = b; $('#tk').textContent = c; $('#ta').textContent = INR(d); };
-  document.querySelectorAll('#st .inp').forEach(i => i.oninput = () => { i.value = i.value.replace(/\D/g, ''); calc(); });
+    return {c:c.category, p:num(c.price), rec, sold:s ? s.sold : ''};
+  })}));
+  $('#pane').innerHTML = `
+  <div class="hero"><div><h2>🎟️ Ticket sales entry</h2><p>${S.user.school}</p></div><div class="hs">Last saved<b>${lastTs(mine)}</b></div></div>
+  <p class="meta">Enter total tickets sold per category for each event date. Total sale can never be more than tickets received. You can edit and save any number of times.</p>
+  ${D.map((g, i) => `<div class="card dcard"><div class="dban" style="background:${GR[i % 4]}">📅 Event date · ${g.d}</div>
+   <div class="tw"><table class="st" id="st${i}"><thead><tr><th>Event date</th><th>Category</th><th>Received</th><th>Total sale</th><th>In stock</th><th>Amount</th></tr></thead><tbody>
+   ${g.rows.map((x, j) => `<tr data-d="${g.d}" data-c="${x.c}" data-r="${x.rec}" data-p="${x.p}">${j === 0 ? `<td class="c-d dtc" rowspan="${g.rows.length + 1}">${g.d}</td>` : ''}
+    <td class="catc" style="border-left:6px solid ${col(x.c)}">${chip(x.c)}<br><small>${INR(x.p)}</small></td><td class="c-r">${x.rec}</td>
+    <td class="c-s"><input class="inp" inputmode="numeric" maxlength="6" value="${x.sold}" placeholder="0 – ${x.rec}" ${x.rec ? '' : 'disabled'}></td><td class="c-k"></td><td class="c-a"></td></tr>`).join('')}
+   <tr class="sub"><td>Day total</td><td></td><td></td><td></td><td></td></tr></tbody></table></div></div>`).join('')}
+  <div class="sbar"><div class="gtt">Total sold <b id="gs">0</b><span>Amount <b id="ga">₹0</b></span></div><button class="btn" id="sv">💾 Save sales</button></div>`;
+  const calc = () => { let gs = 0, ga = 0;
+    D.forEach((g, i) => { let r = 0, s = 0, k = 0, m = 0;
+      document.querySelectorAll(`#st${i} tbody tr[data-r]`).forEach(tr => { const rc = +tr.dataset.r, p = +tr.dataset.p, v = num(tr.querySelector('input').value), st = rc - v;
+        tr.querySelector('.c-k').textContent = st; tr.querySelector('.c-a').textContent = INR(v * p); r += rc; s += v; k += st; m += v * p; });
+      const c = document.querySelector(`#st${i} tr.sub`).children; c[1].textContent = r; c[2].textContent = s; c[3].textContent = k; c[4].textContent = INR(m); gs += s; ga += m; });
+    $('#gs').textContent = gs; $('#ga').textContent = INR(ga); };
+  document.querySelectorAll('.st .inp').forEach(inp => inp.oninput = () => {
+    const tr = inp.closest('tr'), r = +tr.dataset.r; let v = inp.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+    if (v !== '' && +v > r) { v = String(r); inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake'); toast(`${tr.dataset.c}: total sale cannot exceed received (${r})`, false); }
+    inp.value = v; calc(); });
   calc();
-  $('#sv').onclick = async e => {
-    const data = [...document.querySelectorAll('#st tbody tr')].filter(tr => tr.querySelector('input').value !== '').map(tr => ({date:tr.dataset.d, category:tr.dataset.c, sold:num(tr.querySelector('input').value), rec:+tr.dataset.r}));
+  $('#sv').onclick = async () => {
+    const data = [...document.querySelectorAll('.st tbody tr[data-r]')].filter(tr => tr.querySelector('input').value !== '').map(tr => ({date:tr.dataset.d, category:tr.dataset.c, sold:num(tr.querySelector('input').value), rec:+tr.dataset.r}));
     const bad = data.find(x => x.sold > x.rec);
     if (bad) return toast(`Sold is more than received for ${bad.date} ${bad.category}.`, false);
     if (!data.length) return toast('Enter at least one sale before saving.', false);
@@ -390,6 +415,10 @@ function teachView() {
     const rows = T.filter(t => t.teacher.trim() || t.sold !== '' || t.designation || t.category);
     const bad = rows.find(t => !t.teacher.trim() || !t.designation || !t.category || t.sold === '');
     if (bad) return toast('Complete name, designation, category and sale in every row.', false);
+    const recBy = {}, tot = {}; S.alloc.filter(own).forEach(x => recBy[x.category] = (recBy[x.category] || 0) + num(x.received));
+    rows.forEach(x => tot[x.category] = (tot[x.category] || 0) + num(x.sold));
+    const over = Object.keys(tot).find(c => tot[c] > (recBy[c] || 0));
+    if (over) return toast(`${over}: teacher sales (${tot[over]}) cannot exceed tickets received (${recBy[over] || 0}).`, false);
     wait(true, 'Saving teacher sales');
     const r = await api('saveTeachers', {name:S.user.name, pin:S.pin, rows});
     if (!r.ok) { wait(false); return toast(r.error, false); }
