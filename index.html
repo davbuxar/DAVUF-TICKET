@@ -138,7 +138,7 @@ td select{border-color:rgba(139,92,246,.5);min-width:96px}
 
 <script>
 /* ====== SETTINGS ====== */
-const API_URL = "https://script.google.com/macros/s/AKfycbyDC5sGLDGuG_BYyBF1ZW3w8SDfRTF6UOgaPORsnG_AiD1Oy3DNwzJ18WF4wTjrViY2/exechttps://script.google.com/macros/s/AKfycbyDC5sGLDGuG_BYyBF1ZW3w8SDfRTF6UOgaPORsnG_AiD1Oy3DNwzJ18WF4wTjrViY2/exec";   // paste your Google Apps Script Web App URL (ends with /exec)
+const API_URL = ("https://script.google.com/macros/s/AKfycbyDC5sGLDGuG_BYyBF1ZW3w8SDfRTF6UOgaPORsnG_AiD1Oy3DNwzJ18WF4wTjrViY2/exechttps://script.google.com/macros/s/AKfycbyDC5sGLDGuG_BYyBF1ZW3w8SDfRTF6UOgaPORsnG_AiD1Oy3DNwzJ18WF4wTjrViY2/exec".match(/https:\/\/script\.google\.com\/macros\/s\/[^\/\s"]+\/exec/) || [""])[0];   // paste your Web App URL between the quotes
 const DEMO = !API_URL;
 /* ====================== */
 const $ = s => document.querySelector(s);
@@ -154,8 +154,9 @@ async function api(action, p = {}) {
   if (DEMO) return mock(action, p);
   try {
     const r = await fetch(API_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify({action, ...p})});
-    return await r.json();
-  } catch (e) { return {ok:false, error:'Network error. Check connection and API_URL.'}; }
+    const t = await r.text();
+    try { return JSON.parse(t); } catch (x) { return {ok:false, error:'Script did not return data. Set access to "Anyone" and redeploy. (' + t.slice(0, 60).replace(/<[^>]*>/g, '') + ')'}; }
+  } catch (e) { return {ok:false, error:'Cannot reach script (' + e.message + '). Redeploy with access = Anyone.'}; }
 }
 function mock(a, p) {
   let D = JSON.parse(localStorage.getItem('demoDB') || 'null');
