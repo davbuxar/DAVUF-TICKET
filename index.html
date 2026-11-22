@@ -115,7 +115,7 @@ td select{border-color:rgba(139,92,246,.5);min-width:96px}
 .wb h3{font-size:20px;margin-bottom:4px}.wb p{color:var(--mut);font-size:12.5px;margin-bottom:14px}
 .cf{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;z-index:101;animation:cf 1.8s ease-in forwards;pointer-events:none}
 @keyframes cf{to{transform:translateY(105vh) rotate(720deg);opacity:.9}}
-</style>
+.sch{position:sticky;left:0;z-index:1;font-weight:600;min-width:110px;max-width:140px;background:#e0f2fe}[data-t=dark] .sch{background:#12324a}</style>
 </head>
 <body>
 
@@ -233,6 +233,17 @@ function aggRows() {
   }));
   return R;
 }
+function summaryRows() {
+  const Sa = scope(S.sales), cats = S.cfg.categories, pr = {}; cats.forEach(c => pr[c.category] = num(c.price));
+  const schools = [...new Set([...(isAdmin() ? [] : [S.user.school]), ...Sa.map(x => x.school)])].filter(Boolean).sort();
+  const rows = [];
+  schools.forEach(sc => S.cfg.dates.forEach((d, i) => {
+    const q = {}; let tot = 0, amt = 0;
+    cats.forEach(c => { const n = sum(Sa.filter(x => x.school === sc && x.date === d && x.category === c.category), x => x.sold); q[c.category] = n; tot += n; amt += n * pr[c.category]; });
+    rows.push({sc, d, q, tot, amt, first:i === 0, span:S.cfg.dates.length});
+  }));
+  return rows;
+}
 function lastTs(arr) { return arr.map(x => String(x.timestamp)).sort().pop() || '—'; }
 function topSellers() {
   const m = {};
@@ -285,7 +296,7 @@ function show(t) {
 /* ---------- dashboard (read only) ---------- */
 function dashboard() {
   const R = aggRows(), rec = sum(R, x => x.rec), sold = sum(R, x => x.sold), amt = sum(R, x => x.amt), pct = rec ? Math.round(sold * 100 / rec) : 0;
-  const tops = topSellers(), sl = scope(S.sales);
+  const tops = topSellers(), sl = scope(S.sales), Q = summaryRows();
   $('#pane').innerHTML = `
   <div class="kpis">
    <div class="k k1"><small>Tickets received</small><b data-n="${rec}">0</b></div>
@@ -294,11 +305,11 @@ function dashboard() {
    <div class="k k4"><small>Total sale amount</small><b data-n="${amt}" data-m="1">0</b></div>
   </div>
   <div class="card"><h2>🎯 Sales progress <span class="sp"></span><span style="color:var(--p)">${pct}%</span></h2><div class="bar"><div id="pb"></div></div></div>
-  <div class="card"><h2>📋 ${isAdmin() ? 'All users' : 'My'} ticket summary <span class="sp"></span><button class="btn ghost" id="csv" style="padding:6px 12px;font-size:12px">⬇ CSV</button></h2>
-   <p class="meta">Read-only · Last updated: ${lastTs(sl)}</p>
-   <div class="tw"><table><thead><tr><th>Date</th><th>Category</th><th>Received</th><th>Sold</th><th>Stock</th><th>Amount</th></tr></thead><tbody>
-   ${R.map(x => `<tr><td class="c-d">${x.d}</td><td>${chip(x.c)}<br><small>${INR(x.p)}</small></td><td class="c-r">${x.rec}</td><td class="c-s">${x.sold}</td><td class="c-k ${x.stock < 0 ? 'neg' : ''}">${x.stock}</td><td class="c-a">${INR(x.amt)}</td></tr>`).join('')}
-   </tbody><tfoot><tr><td colspan="2">Total</td><td>${rec}</td><td>${sold}</td><td>${rec - sold}</td><td>${INR(amt)}</td></tr></tfoot></table></div></div>
+  <div class="card"><h2>📋 Ticket summary <span class="sp"></span><button class="btn ghost" id="csv" style="padding:6px 12px;font-size:12px">⬇ CSV</button></h2>
+   <p class="meta">Read-only · ${isAdmin() ? 'All schools' : S.user.school} · Tickets sold by category · Last updated: ${lastTs(sl)}</p>
+   <div class="tw">${Q.length ? `<table id="sum"><thead><tr><th>School</th><th>Date</th>${S.cfg.categories.map(c => `<th style="background:${col(c.category)}">${c.category}</th>`).join('')}<th>Total sale</th><th>Total amount</th></tr></thead><tbody>
+   ${Q.map(x => `<tr>${x.first ? `<td class="c-d sch" rowspan="${x.span}">${x.sc}</td>` : ''}<td>${x.d}</td>${S.cfg.categories.map(c => `<td class="c-s">${x.q[c.category]}</td>`).join('')}<td class="c-k">${x.tot}</td><td class="c-a">${INR(x.amt)}</td></tr>`).join('')}
+   </tbody><tfoot><tr><td colspan="2">Total</td>${S.cfg.categories.map(c => `<td>${sum(Q, x => x.q[c.category])}</td>`).join('')}<td>${sum(Q, x => x.tot)}</td><td>${INR(sum(Q, x => x.amt))}</td></tr></tfoot></table>` : '<div class="empty">No sales saved yet. Add them in the Ticket sales tab.</div>'}</div></div>
   <div class="cg"><div class="card"><h2>📈 Daily sales by category</h2><div class="cv"><canvas id="c1"></canvas></div></div>
    <div class="card"><h2>🥧 Revenue share</h2><div class="cv"><canvas id="c2"></canvas></div></div></div>
   <div class="card"><h2>🏆 Top ticket seller · school wise</h2>
@@ -306,7 +317,7 @@ function dashboard() {
   </div>`;
   document.querySelectorAll('[data-n]').forEach(e => countUp(e, +e.dataset.n, e.dataset.m));
   setTimeout(() => $('#pb').style.width = pct + '%', 80);
-  $('#csv').onclick = () => { const L = ['Date,Category,Price,Received,Sold,Stock,Amount', ...R.map(x => [x.d, x.c, x.p, x.rec, x.sold, x.stock, x.amt].join(','))];
+  $('#csv').onclick = () => { const cn = S.cfg.categories.map(c => c.category), L = [['School','Date',...cn,'Total sale','Total amount'].join(','), ...Q.map(x => ['"' + x.sc + '"', x.d, ...cn.map(c => x.q[c]), x.tot, x.amt].join(','))];
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([L.join('\n')], {type:'text/csv'})); a.download = 'ticket-summary.csv'; a.click(); };
   if (!window.Chart) return;
   Chart.defaults.font.family = 'Poppins'; Chart.defaults.color = getComputedStyle(document.body).color;
