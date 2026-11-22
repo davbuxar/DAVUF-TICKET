@@ -108,7 +108,7 @@ td select{border-color:rgba(139,92,246,.5);min-width:96px}
  <div class="blob"></div><div class="blob"></div>
  <div class="lcard">
   <img src="https://davrecruit.davcmc.in/CBT/logo.png" alt="DAV logo">
-  <h1>Ticket Stock Manager Bihar Zone - J </h1><p>Sign in to record and track event ticket sales</p>
+  <h1>Ticket Stock Manager</h1><p>Sign in to record and track event ticket sales</p>
   <label>User name</label>
   <select id="uSel"><option>Loading users…</option></select>
   <label>PIN</label>
@@ -138,7 +138,7 @@ td select{border-color:rgba(139,92,246,.5);min-width:96px}
 
 <script>
 /* ====== SETTINGS ====== */
-const API_URL = ("https://script.google.com/macros/s/AKfycbwfPfukx0G6CbkaYgv28-ZvtqQXhek6ArKWH8CrrV-MnoaF82mq0vB0Sp_3V3Qi8LcJ/exec".match(/https:\/\/script\.google\.com\/macros\/s\/[^\/\s"]+\/exec/) || [""])[0];   // paste your Web App URL between the quotes
+const API_URL = ("https://script.google.com/macros/s/AKfycbzRJoFzQGQ9LBmQjv4jRRzRtS1ufyAvUsm7PCFWmoNpfBxdM7QkGsmDp99fB7qFDCvs/exec".match(/https:\/\/script\.google\.com\/macros\/s\/[^\/\s"]+\/exec/) || [""])[0];   // paste your Web App URL between the quotes
 const DEMO = !API_URL;
 /* ====================== */
 const $ = s => document.querySelector(s);
@@ -320,7 +320,7 @@ function salesView() {
     if (!data.length) return toast('Enter at least one sale before saving.', false);
     busy(e.currentTarget, true); const r = await api('saveSales', {name:S.user.name, pin:S.pin, rows:data}); busy(e.currentTarget, false);
     if (!r.ok) return toast(r.error, false);
-    await reload(); toast('Sales saved'); salesView();
+    await reload(); toast('Saved to: ' + (r.where || 'old script version - redeploy!')); salesView();
   };
 }
 
@@ -354,7 +354,7 @@ function teachView() {
     if (bad) return toast('Complete name, designation, category and sale in every row.', false);
     busy(e.currentTarget, true); const r = await api('saveTeachers', {name:S.user.name, pin:S.pin, rows}); busy(e.currentTarget, false);
     if (!r.ok) return toast(r.error, false);
-    await reload(); toast('Teacher sales saved'); teachView();
+    await reload(); toast('Saved to: ' + (r.where || 'old script version - redeploy!')); teachView();
   };
 }
 
