@@ -108,7 +108,7 @@ td select{border-color:rgba(139,92,246,.5);min-width:96px}
  <div class="blob"></div><div class="blob"></div>
  <div class="lcard">
   <img src="https://davrecruit.davcmc.in/CBT/logo.png" alt="DAV logo">
-  <h1>Ticket Stock Manager</h1><p>Sign in to record and track event ticket sales</p>
+  <h1>Ticket Stock Manager Bihar Zone - J </h1><p>Sign in to record and track event ticket sales</p>
   <label>User name</label>
   <select id="uSel"><option>Loading users…</option></select>
   <label>PIN</label>
@@ -360,7 +360,7 @@ function teachView() {
 
 /* ---------- events ---------- */
 $('#lbtn').onclick = login;
-$('#pin').onkeydown = e => e.key === 'Enter' && login();
+$('#pin').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 $('#eye').onclick = () => $('#pin').classList.toggle('show');
 $('#nav').onclick = e => { const b = e.target.closest('button'); if (b) show(b.dataset.t); };
 $('#rf').onclick = async () => { if (await reload()) { show(tab); toast('Data refreshed'); } };
