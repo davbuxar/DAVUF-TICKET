@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3730a3">
-<title>DAVUF-2026 Tickets Details</title>
+<title>DAV Ticket Stock Manager</title>
 <link rel="icon" href="https://davrecruit.davcmc.in/CBT/logo.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -131,7 +131,7 @@ body{background:radial-gradient(900px 400px at 0 0,rgba(99,102,241,.16),transpar
 .sbar{position:sticky;bottom:calc(68px + env(safe-area-inset-bottom));z-index:15;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:20px;background:var(--card);border:1px solid var(--bd);box-shadow:0 10px 30px rgba(79,70,229,.25)}
 .gtt{font-size:12px;color:var(--mut)}.gtt b{color:var(--p);font-size:17px;margin-left:4px}.gtt span{margin-left:12px}
 @media(min-width:760px){.sbar{bottom:14px}}
-</style>
+.shc{font-weight:700;font-size:12px;white-space:nowrap}.dban{cursor:pointer;user-select:none}.pill{display:inline-block;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#6366f1,#ec4899)}.lockb{border-left:6px solid #ef4444}.openb{border-left:6px solid #10b981}.lockb .pill{background:#ef4444}nav button{font-size:10.5px}</style>
 </head>
 <body>
 
@@ -139,14 +139,14 @@ body{background:radial-gradient(900px 400px at 0 0,rgba(99,102,241,.16),transpar
  <div class="blob"></div><div class="blob"></div>
  <div class="lcard">
   <img src="https://davrecruit.davcmc.in/CBT/logo.png" alt="DAV logo">
-  <h1>Ticket Details (BRZ-J)</h1><p>Sign in to record and track event ticket sales</p>
+  <h1>Ticket Stock Manager</h1><p>Sign in to record and track event ticket sales</p>
   <label>User name</label>
   <select id="uSel"><option>Loading users…</option></select>
   <label>PIN</label>
   <div class="pw"><input id="pin" type="text" inputmode="numeric" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Enter your PIN"><span id="eye">👁</span></div>
   <div id="lerr" class="err" hidden></div>
   <button id="lbtn" class="btn big">Sign in</button>
-  <div id="demoNote" class="demo" hidden>Demo mode: set API_URL./div>
+  <div id="demoNote" class="demo" hidden>Demo mode: set API_URL in index.html to use your Google Sheet.<br>Try Rajesh Kumar / 1234 or Admin / 0000</div>
  </div>
 </section>
 
@@ -154,24 +154,25 @@ body{background:radial-gradient(900px 400px at 0 0,rgba(99,102,241,.16),transpar
  <header>
   <img src="https://davrecruit.davcmc.in/CBT/logo.png" alt="">
   <div class="who"><b id="hName"></b><small id="hSchool"></small></div>
-  <button class="ib" id="rf" title="Refresh">⟳ Refresh</button>
-  <button class="ib" id="th" title="Dark mode">🌓 Dark Theme</button>
-  <button class="ib" id="lo" title="Sign out">⏻ Logout</button>
+  <button class="ib" id="rf" title="Refresh">⟳</button>
+  <button class="ib" id="th" title="Dark mode">🌓</button>
+  <button class="ib" id="lo" title="Sign out">⏻</button>
  </header>
  <nav id="nav">
   <button data-t="dash" class="on"><i>📊</i>Dashboard</button>
+  <button data-t="alloc"><i>📦</i>Stock</button>
   <button data-t="sales"><i>🎟️</i>Ticket sales</button>
   <button data-t="teach"><i>👩‍🏫</i>Teacher sales</button>
  </nav>
  <main id="view"></main>
 </div>
-<div id="wait"><div class="wb"><div class="ring"></div><b id="wm" class="dots">Please wait</b><small>Talking to Database</small></div></div>
+<div id="wait"><div class="wb"><div class="ring"></div><b id="wm" class="dots">Please wait</b><small>Talking to Google Sheet</small></div></div>
 <div id="okm"><div class="wb"><div class="tick"><svg viewBox="0 0 52 52"><path d="M14 27l8 8 16-17"/></svg></div><h3 id="okt">Saved!</h3><p id="okp"></p><button class="btn" id="okb">Done</button></div></div>
 <div id="toast"></div>
 
 <script>
 /* ====== SETTINGS ====== */
-const API_URL = ("https://script.google.com/macros/s/AKfycbwa3ny5bqOYXTiZM3Nd0ITpKRQLW-X79MUFkHzaP9UHPq7c5uM_myRhfGHZ4JQs-FNi/exec".match(/https:\/\/script\.google\.com\/macros\/s\/[^\/\s"]+\/exec/) || [""])[0];   // paste your Web App URL between the quotes
+const API_URL = ("https://script.google.com/macros/s/AKfycbxJch64-xuLhdXzUGPZSAth2bVyHT8ucaazfd8ba2e68JgU5X0CIjadVhn_QkD8s0x4/exec".match(/https:\/\/script\.google\.com\/macros\/s\/[^\/\s"]+\/exec/) || [""])[0];   // paste your Web App URL between the quotes
 const DEMO = !API_URL;
 /* ====================== */
 const $ = s => document.querySelector(s);
@@ -193,13 +194,13 @@ async function api(action, p = {}) {
 }
 function mock(a, p) {
   let D = JSON.parse(localStorage.getItem('demoDB') || 'null');
-  if (!D) {
+  if (!D || !D.cfg.shifts) {
     const cats = [['Silver',600],['Gold',825],['Platinum',1000],['Diamond',1175]];
     D = {users:[{name:'Rajesh Kumar',pin:'1234',school:'DAV Public School, Patna',role:'User'},{name:'Sunita Devi',pin:'1234',school:'DAV Gandhi Maidan',role:'User'},{name:'Admin',pin:'0000',school:'',role:'Admin'}],
-      cfg:{categories:cats.map(c=>({category:c[0],price:c[1]})),dates:['28-11-2026','29-11-2026','30-11-2026'],designations:['Principal','Vice Principal','PGT','TGT','PRT','Clerk']},
+      cfg:{categories:cats.map(c=>({category:c[0],price:c[1]})),dates:['28-11-2026','29-11-2026','30-11-2026'],shifts:['Shift-1','Shift-2','Shift-3','Shift-4'],designations:['Principal','Vice Principal','PGT','TGT','PRT','Clerk']},
       alloc:[],sales:[],teachers:[]};
-    D.users.filter(u=>u.role!=='Admin').forEach((u,i)=>D.cfg.dates.forEach(d=>cats.forEach((c,j)=>D.alloc.push({user:u.name,date:d,category:c[0],received:40+i*10+j*5}))));
-    D.teachers=[{timestamp:'2026-11-20 10:00:00',user:'Sunita Devi',school:'DAV Gandhi Maidan',teacher:'ANITA SHARMA',designation:'PGT',category:'Gold',price:825,sold:12,amount:9900}];
+    D.users.filter(u=>u.role!=='Admin').forEach((u,i)=>D.cfg.dates.forEach(d=>cats.forEach((c,j)=>D.cfg.shifts.forEach((sh,k)=>D.alloc.push({user:u.name,date:d,category:c[0],shift:sh,received:10+i*3+j+k})))));
+    D.teachers=[{timestamp:'2026-11-20 10:00:00',user:'Sunita Devi',school:'DAV Gandhi Maidan',teacher:'ANITA SHARMA',designation:'PGT',category:'Gold',shift:'Shift-1',price:825,sold:8,amount:6600}];
   }
   const save = () => localStorage.setItem('demoDB', JSON.stringify(D));
   const now = () => new Date(Date.now()+19800000).toISOString().slice(0,19).replace('T',' ');
@@ -207,16 +208,22 @@ function mock(a, p) {
   if (a === 'init') return {ok:true, users:D.users.map(x=>({name:x.name,school:x.school}))};
   if (!u || u.pin !== String(p.pin)) return {ok:false, error:'Wrong PIN. Please try again.'};
   if (a === 'login') return {ok:true, user:{name:u.name,school:u.school,role:u.role}};
-  if (a === 'load') return {ok:true, cfg:D.cfg, alloc:D.alloc, sales:D.sales, teachers:D.teachers};
+  if (a === 'load') return {ok:true, cfg:{...D.cfg, maxAlloc:2}, alloc:D.alloc, sales:D.sales, teachers:D.teachers, allocLog:D.allocLog || []};
+  if (a === 'saveAlloc') {
+    D.allocLog = D.allocLog || []; let g = D.allocLog.find(x => x.user === u.name); if (!g) D.allocLog.push(g = {user:u.name, updates:0, lastupdated:''});
+    if (g.updates >= 2) return {ok:false, error:'Allocation is locked. You have used all 2 updates.'};
+    D.alloc = D.alloc.filter(x => x.user !== u.name).concat(p.rows.map(r => ({user:u.name, date:r.date, category:r.category, shift:r.shift, received:num(r.received)})));
+    g.updates++; g.lastupdated = now(); save(); return {ok:true, time:g.lastupdated};
+  }
   if (a === 'saveSales') {
-    p.rows.forEach(r => { const l = {timestamp:now(),user:u.name,school:u.school,date:r.date,category:r.category,sold:num(r.sold)};
-      const i = D.sales.findIndex(x=>x.user===u.name&&x.date===r.date&&x.category===r.category); i<0?D.sales.push(l):D.sales[i]=l; });
+    p.rows.forEach(r => { const l = {timestamp:now(),user:u.name,school:u.school,date:r.date,category:r.category,shift:r.shift,sold:num(r.sold)};
+      const i = D.sales.findIndex(x=>x.user===u.name&&x.date===r.date&&x.category===r.category&&x.shift===r.shift); i<0?D.sales.push(l):D.sales[i]=l; });
     save(); return {ok:true};
   }
   if (a === 'saveTeachers') {
     D.teachers = D.teachers.filter(x=>x.user!==u.name);
     p.rows.forEach(r => { const pr = num(D.cfg.categories.find(c=>c.category===r.category)?.price);
-      D.teachers.push({timestamp:now(),user:u.name,school:u.school,teacher:r.teacher.trim(),designation:r.designation,category:r.category,price:pr,sold:num(r.sold),amount:pr*num(r.sold)}); });
+      D.teachers.push({timestamp:now(),user:u.name,school:u.school,teacher:r.teacher.trim(),designation:r.designation,category:r.category,shift:r.shift,price:pr,sold:num(r.sold),amount:pr*num(r.sold)}); });
     save(); return {ok:true};
   }
 }
@@ -260,6 +267,14 @@ function summaryRows() {
   }));
   return rows;
 }
+function shiftMatrix() {
+  const Sa = scope(S.sales), A = scope(S.alloc), SH = S.cfg.shifts;
+  return `<div class="tw"><table><thead><tr><th>Category</th>${SH.map(h => `<th>${h}</th>`).join('')}<th>Total</th></tr></thead><tbody>
+  ${S.cfg.categories.map(c => { const cell = h => { const so = sum(Sa.filter(x => x.category === c.category && x.shift === h), x => x.sold), re = sum(A.filter(x => x.category === c.category && x.shift === h), x => x.received); return [so, re]; };
+    const v = SH.map(cell), ts = v.reduce((a, b) => a + b[0], 0), tr = v.reduce((a, b) => a + b[1], 0);
+    return `<tr><td>${chip(c.category)}</td>${v.map(x => `<td class="c-s"><b>${x[0]}</b> <small>/ ${x[1]}</small></td>`).join('')}<td class="c-k"><b>${ts}</b> <small>/ ${tr}</small></td></tr>`; }).join('')}
+  </tbody></table></div>`;
+}
 function lastTs(arr) { return arr.map(x => String(x.timestamp)).sort().pop() || '—'; }
 function topSellers() {
   const m = {};
@@ -299,14 +314,14 @@ async function reload() {
   const r = await api('load', {name:S.user.name, pin:S.pin});
   if (!r.ok) { toast(r.error, false); return false; }
   Object.assign(S, r);
-  T = S.teachers.filter(own).map(t => ({teacher:t.teacher, designation:t.designation, category:t.category, sold:t.sold}));
+  T = S.teachers.filter(own).map(t => ({teacher:t.teacher, designation:t.designation, category:t.category, shift:t.shift || '', sold:t.sold}));
   return true;
 }
 function show(t) {
   tab = t; document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
   charts.forEach(c => c.destroy()); charts = [];
   const v = $('#view'); v.innerHTML = '<div class="v" id="pane"></div>';
-  ({dash:dashboard, sales:salesView, teach:teachView})[t](); scrollTo({top:0});
+  ({dash:dashboard, alloc:allocView, sales:salesView, teach:teachView})[t](); scrollTo({top:0});
 }
 
 /* ---------- dashboard (read only) ---------- */
@@ -326,6 +341,7 @@ function dashboard() {
    <div class="tw">${Q.length ? `<table id="sum"><thead><tr><th>School</th><th>Date</th>${S.cfg.categories.map(c => `<th style="background:${col(c.category)}">${c.category}</th>`).join('')}<th>Total sale</th><th>Total amount</th></tr></thead><tbody>
    ${Q.map(x => `<tr>${x.first ? `<td class="c-d sch" rowspan="${x.span}">${x.sc}</td>` : ''}<td>${x.d}</td>${S.cfg.categories.map(c => `<td class="c-s">${x.q[c.category]}</td>`).join('')}<td class="c-k">${x.tot}</td><td class="c-a">${INR(x.amt)}</td></tr>`).join('')}
    </tbody><tfoot><tr><td colspan="2">Total</td>${S.cfg.categories.map(c => `<td>${sum(Q, x => x.q[c.category])}</td>`).join('')}<td>${sum(Q, x => x.tot)}</td><td>${INR(sum(Q, x => x.amt))}</td></tr></tfoot></table>` : '<div class="empty">No sales saved yet. Add them in the Ticket sales tab.</div>'}</div></div>
+  <div class="card"><h2>🕐 Shift-wise sales <small style="font-weight:400;color:var(--mut)">sold / received</small></h2>${shiftMatrix()}</div>
   <div class="cg"><div class="card"><h2>📈 Daily sales by category</h2><div class="cv"><canvas id="c1"></canvas></div></div>
    <div class="card"><h2>🥧 Revenue share</h2><div class="cv"><canvas id="c2"></canvas></div></div></div>
   <div class="card"><h2>🏆 Top ticket seller · school wise</h2>
@@ -346,22 +362,23 @@ function dashboard() {
 
 /* ---------- ticket sales entry ---------- */
 function salesView() {
-  const mine = S.sales.filter(own);
+  const mine = S.sales.filter(own), SH = S.cfg.shifts, CT = S.cfg.categories;
   const GR = ['linear-gradient(135deg,#0ea5e9,#6366f1)', 'linear-gradient(135deg,#8b5cf6,#ec4899)', 'linear-gradient(135deg,#f59e0b,#ef4444)', 'linear-gradient(135deg,#10b981,#06b6d4)'];
-  const D = S.cfg.dates.map(d => ({d, rows:S.cfg.categories.map(c => {
-    const rec = sum(S.alloc.filter(x => own(x) && x.date === d && x.category === c.category), x => x.received);
-    const s = mine.find(x => x.date === d && x.category === c.category);
-    return {c:c.category, p:num(c.price), rec, sold:s ? s.sold : ''};
-  })}));
+  const D = S.cfg.dates.map(d => ({d, rows:CT.flatMap(c => SH.map(sh => {
+    const rec = sum(S.alloc.filter(x => own(x) && x.date === d && x.category === c.category && x.shift === sh), x => x.received);
+    const s = mine.find(x => x.date === d && x.category === c.category && x.shift === sh);
+    return {c:c.category, sh, p:num(c.price), rec, sold:s ? s.sold : ''};
+  }))}));
   $('#pane').innerHTML = `
   <div class="hero"><div><h2>🎟️ Ticket sales entry</h2><p>${S.user.school}</p></div><div class="hs">Last saved<b>${lastTs(mine)}</b></div></div>
-  <p class="meta">Enter total tickets sold per category for each event date. Total sale can never be more than tickets received. You can edit and save any number of times.</p>
-  ${D.map((g, i) => `<div class="card dcard"><div class="dban" style="background:${GR[i % 4]}">📅 Event date · ${g.d}</div>
-   <div class="tw"><table class="st" id="st${i}"><thead><tr><th>Event date</th><th>Category</th><th>Received</th><th>Total sale</th><th>In stock</th><th>Amount</th></tr></thead><tbody>
-   ${g.rows.map((x, j) => `<tr data-d="${g.d}" data-c="${x.c}" data-r="${x.rec}" data-p="${x.p}">${j === 0 ? `<td class="c-d dtc" rowspan="${g.rows.length + 1}">${g.d}</td>` : ''}
-    <td class="catc" style="border-left:6px solid ${col(x.c)}">${chip(x.c)}<br><small>${INR(x.p)}</small></td><td class="c-r">${x.rec}</td>
+  <p class="meta">Enter tickets sold for every category and shift. Total sale can never be more than tickets received. Tap a date banner to collapse it. You can edit and save any number of times.</p>
+  ${D.map((g, i) => `<div class="card dcard"><div class="dban" style="background:${GR[i % 4]}" onclick="this.nextElementSibling.hidden=!this.nextElementSibling.hidden">📅 Event date · ${g.d}<span style="float:right">▾</span></div>
+   <div class="tw"><table class="st" id="st${i}"><thead><tr><th>Event date</th><th>Category</th><th>Shift</th><th>Received</th><th>Total sale</th><th>In stock</th><th>Amount</th></tr></thead><tbody>
+   ${g.rows.map((x, j) => `<tr data-d="${g.d}" data-c="${x.c}" data-s="${x.sh}" data-r="${x.rec}" data-p="${x.p}">${j === 0 ? `<td class="c-d dtc" rowspan="${g.rows.length + 1}">${g.d}</td>` : ''}
+    ${j % SH.length === 0 ? `<td class="catc" rowspan="${SH.length}" style="border-left:6px solid ${col(x.c)}">${chip(x.c)}<br><small>${INR(x.p)}</small></td>` : ''}
+    <td class="shc" style="color:${col(x.c)}">${x.sh}</td><td class="c-r">${x.rec}</td>
     <td class="c-s"><input class="inp" inputmode="numeric" maxlength="6" value="${x.sold}" placeholder="0 – ${x.rec}" ${x.rec ? '' : 'disabled'}></td><td class="c-k"></td><td class="c-a"></td></tr>`).join('')}
-   <tr class="sub"><td>Day total</td><td></td><td></td><td></td><td></td></tr></tbody></table></div></div>`).join('')}
+   <tr class="sub"><td colspan="2">Day total</td><td></td><td></td><td></td><td></td></tr></tbody></table></div></div>`).join('')}
   <div class="sbar"><div class="gtt">Total sold <b id="gs">0</b><span>Amount <b id="ga">₹0</b></span></div><button class="btn" id="sv">💾 Save sales</button></div>`;
   const calc = () => { let gs = 0, ga = 0;
     D.forEach((g, i) => { let r = 0, s = 0, k = 0, m = 0;
@@ -371,33 +388,78 @@ function salesView() {
     $('#gs').textContent = gs; $('#ga').textContent = INR(ga); };
   document.querySelectorAll('.st .inp').forEach(inp => inp.oninput = () => {
     const tr = inp.closest('tr'), r = +tr.dataset.r; let v = inp.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
-    if (v !== '' && +v > r) { v = String(r); inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake'); toast(`${tr.dataset.c}: total sale cannot exceed received (${r})`, false); }
+    if (v !== '' && +v > r) { v = String(r); inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake'); toast(`${tr.dataset.c} ${tr.dataset.s}: total sale cannot exceed received (${r})`, false); }
     inp.value = v; calc(); });
   calc();
   $('#sv').onclick = async () => {
-    const data = [...document.querySelectorAll('.st tbody tr[data-r]')].filter(tr => tr.querySelector('input').value !== '').map(tr => ({date:tr.dataset.d, category:tr.dataset.c, sold:num(tr.querySelector('input').value), rec:+tr.dataset.r}));
+    const data = [...document.querySelectorAll('.st tbody tr[data-r]')].filter(tr => tr.querySelector('input').value !== '').map(tr => ({date:tr.dataset.d, category:tr.dataset.c, shift:tr.dataset.s, sold:num(tr.querySelector('input').value), rec:+tr.dataset.r}));
     const bad = data.find(x => x.sold > x.rec);
-    if (bad) return toast(`Sold is more than received for ${bad.date} ${bad.category}.`, false);
+    if (bad) return toast(`Sold is more than received for ${bad.date} ${bad.category} ${bad.shift}.`, false);
     if (!data.length) return toast('Enter at least one sale before saving.', false);
     wait(true, 'Saving ticket sales');
     const r = await api('saveSales', {name:S.user.name, pin:S.pin, rows:data});
     if (!r.ok) { wait(false); return toast(r.error, false); }
     await reload(); wait(false); salesView();
-    done('Ticket sales saved!', data.length + ' rows updated in Database· ' + (r.time || ''));
+    done('Ticket sales saved!', data.length + ' rows updated in Google Sheet · ' + (r.time || ''));
+  };
+}
+
+/* ---------- stock / allocation (2 updates only) ---------- */
+function allocView() {
+  const lg = S.allocLog.find(own) || {}, used = num(lg.updates), max = S.cfg.maxAlloc || 2, left = Math.max(0, max - used), locked = left <= 0;
+  const SH = S.cfg.shifts, CT = S.cfg.categories, mineS = S.sales.filter(own);
+  const GR = ['linear-gradient(135deg,#0ea5e9,#6366f1)', 'linear-gradient(135deg,#8b5cf6,#ec4899)', 'linear-gradient(135deg,#f59e0b,#ef4444)', 'linear-gradient(135deg,#10b981,#06b6d4)'];
+  const D = S.cfg.dates.map(d => ({d, rows:CT.flatMap(c => SH.map(sh => ({c:c.category, sh,
+    rec:sum(S.alloc.filter(x => own(x) && x.date === d && x.category === c.category && x.shift === sh), x => x.received),
+    sold:sum(mineS.filter(x => x.date === d && x.category === c.category && x.shift === sh), x => x.sold)})))}));
+  $('#pane').innerHTML = `
+  <div class="hero"><div><h2>📦 Tickets received (stock)</h2><p>${S.user.school}</p></div>
+   <div class="hs">Last updated<b>${lg.lastupdated || '—'}</b></div></div>
+  <div class="card ${locked ? 'lockb' : 'openb'}"><h2>${locked ? '🔒 Locked' : '✏️ Editable'} <span class="sp"></span><span class="pill">${used} of ${max} updates used</span></h2>
+   <p class="meta" style="margin:0">${locked ? 'You have used all updates. Received tickets can no longer be changed. Please contact the administrator if a correction is needed.' : `You can save received tickets <b>${left} more time${left > 1 ? 's' : ''}</b>. After that this screen becomes read-only. Received cannot be lower than tickets already sold.`}</p></div>
+  ${D.map((g, i) => `<div class="card dcard"><div class="dban" style="background:${GR[i % 4]}" onclick="this.nextElementSibling.hidden=!this.nextElementSibling.hidden">📅 Event date · ${g.d}<span style="float:right">▾</span></div>
+   <div class="tw"><table class="st" id="at${i}"><thead><tr><th>Event date</th><th>Category</th><th>Shift</th><th>Received</th><th>Sold</th><th>In stock</th></tr></thead><tbody>
+   ${g.rows.map((x, j) => `<tr data-d="${g.d}" data-c="${x.c}" data-s="${x.sh}" data-so="${x.sold}">${j === 0 ? `<td class="c-d dtc" rowspan="${g.rows.length + 1}">${g.d}</td>` : ''}
+    ${j % SH.length === 0 ? `<td class="catc" rowspan="${SH.length}" style="border-left:6px solid ${col(x.c)}">${chip(x.c)}</td>` : ''}
+    <td class="shc" style="color:${col(x.c)}">${x.sh}</td>
+    <td class="c-r"><input class="inp ra" inputmode="numeric" maxlength="6" value="${x.rec}" ${locked ? 'disabled' : ''}></td><td class="c-s">${x.sold}</td><td class="c-k"></td></tr>`).join('')}
+   <tr class="sub"><td colspan="2">Day total</td><td></td><td></td><td></td></tr></tbody></table></div></div>`).join('')}
+  <div class="sbar"><div class="gtt">Total received <b id="gr">0</b></div>${locked ? '<span class="pill">🔒 Read-only</span>' : '<button class="btn" id="sv">💾 Save received</button>'}</div>`;
+  const calc = () => { let gr = 0;
+    D.forEach((g, i) => { let r = 0, s = 0, k = 0;
+      document.querySelectorAll(`#at${i} tbody tr[data-d]`).forEach(tr => { const v = num(tr.querySelector('input').value), so = +tr.dataset.so, st = v - so;
+        tr.querySelector('.c-k').textContent = st; tr.querySelector('.c-k').classList.toggle('neg', st < 0); r += v; s += so; k += st; });
+      const c = document.querySelector(`#at${i} tr.sub`).children; c[1].textContent = r; c[2].textContent = s; c[3].textContent = k; gr += r; });
+    $('#gr').textContent = gr; };
+  document.querySelectorAll('.ra').forEach(inp => inp.oninput = () => { inp.value = inp.value.replace(/\D/g, '').replace(/^0+(?=\d)/, ''); calc(); });
+  calc();
+  if (locked) return;
+  $('#sv').onclick = async () => {
+    const rows = [...document.querySelectorAll('.ra')].map(inp => { const tr = inp.closest('tr'); return {date:tr.dataset.d, category:tr.dataset.c, shift:tr.dataset.s, received:num(inp.value), sold:+tr.dataset.so}; });
+    const bad = rows.find(x => x.received < x.sold);
+    if (bad) return toast(`${bad.date} ${bad.category} ${bad.shift}: received cannot be less than sold (${bad.sold}).`, false);
+    if (!confirm(left === 1 ? 'This is your FINAL update. After saving, received tickets will be locked and cannot be edited. Save now?' : `Save received tickets? You will have ${left - 1} update left afterwards.`)) return;
+    wait(true, 'Saving received tickets');
+    const r = await api('saveAlloc', {name:S.user.name, pin:S.pin, rows});
+    if (!r.ok) { wait(false); return toast(r.error, false); }
+    await reload(); wait(false); allocView();
+    done('Received tickets saved!', (left - 1 > 0 ? `${left - 1} update left` : 'Now locked (all updates used)') + ' · ' + (r.time || ''));
   };
 }
 
 /* ---------- teacher sales entry ---------- */
 function teachView() {
-  if (!T.length) T.push({teacher:'', designation:'', category:'', sold:''});
+  const blank = () => ({teacher:'', designation:'', category:'', shift:'', sold:''});
+  if (!T.length) T.push(blank());
   const mine = S.teachers.filter(own), pr = c => num(S.cfg.categories.find(x => x.category === c)?.price);
   const opt = (a, v) => `<option value="">Select</option>` + a.map(x => `<option ${x === v ? 'selected' : ''}>${x}</option>`).join('');
   $('#pane').innerHTML = `<div class="card"><h2>👩‍🏫 Teacher ticket sales</h2>
-   <p class="meta">Add one row per teacher and category. Names accept letters and spaces only (auto capital) · Last saved: ${lastTs(mine)}</p>
-   <div class="tw"><table id="tt"><thead><tr><th>Name of teacher</th><th>Designation</th><th>Category</th><th>Price</th><th>Total sale</th><th>Amount</th><th></th></tr></thead><tbody>
+   <p class="meta">Add one row per teacher, category and shift. Names accept letters and spaces only (auto capital). Teacher sales per category and shift cannot exceed tickets received · Last saved: ${lastTs(mine)}</p>
+   <div class="tw"><table id="tt"><thead><tr><th>Name of teacher</th><th>Designation</th><th>Category</th><th>Shift</th><th>Price</th><th>Total sale</th><th>Amount</th><th></th></tr></thead><tbody>
    ${T.map((t, i) => `<tr data-i="${i}"><td class="c-d"><input class="inp nm" value="${t.teacher}" placeholder="TEACHER NAME"></td>
     <td><select class="d">${opt(S.cfg.designations, t.designation)}</select></td>
     <td><select class="c">${opt(S.cfg.categories.map(c => c.category), t.category)}</select></td>
+    <td><select class="s">${opt(S.cfg.shifts, t.shift)}</select></td>
     <td class="c-r pc">${t.category ? INR(pr(t.category)) : '—'}</td><td class="c-s"><input class="inp q" inputmode="numeric" maxlength="6" value="${t.sold}" placeholder="0"></td>
     <td class="c-a am">${INR(num(t.sold) * pr(t.category))}</td><td><button class="x" title="Remove row">✕</button></td></tr>`).join('')}
    </tbody></table></div>
@@ -406,24 +468,25 @@ function teachView() {
     const i = +tr.dataset.i, t = T[i], upd = () => { tr.querySelector('.pc').textContent = t.category ? INR(pr(t.category)) : '—'; tr.querySelector('.am').textContent = INR(num(t.sold) * pr(t.category)); };
     const nm = tr.querySelector('.nm'); nm.oninput = () => { nm.value = nm.value.replace(/[^a-zA-Z ]/g, '').replace(/^\s+/, '').toUpperCase(); t.teacher = nm.value; };
     tr.querySelector('.d').onchange = e => t.designation = e.target.value;
+    tr.querySelector('.s').onchange = e => t.shift = e.target.value;
     tr.querySelector('.c').onchange = e => { t.category = e.target.value; upd(); };
     const q = tr.querySelector('.q'); q.oninput = () => { q.value = q.value.replace(/\D/g, ''); t.sold = q.value; upd(); };
     tr.querySelector('.x').onclick = () => { T.splice(i, 1); teachView(); };
   });
-  $('#ad').onclick = () => { T.push({teacher:'', designation:'', category:'', sold:''}); teachView(); scrollTo({top:document.body.scrollHeight, behavior:'smooth'}); };
-  $('#sv').onclick = async e => {
-    const rows = T.filter(t => t.teacher.trim() || t.sold !== '' || t.designation || t.category);
-    const bad = rows.find(t => !t.teacher.trim() || !t.designation || !t.category || t.sold === '');
-    if (bad) return toast('Complete name, designation, category and sale in every row.', false);
-    const recBy = {}, tot = {}; S.alloc.filter(own).forEach(x => recBy[x.category] = (recBy[x.category] || 0) + num(x.received));
-    rows.forEach(x => tot[x.category] = (tot[x.category] || 0) + num(x.sold));
-    const over = Object.keys(tot).find(c => tot[c] > (recBy[c] || 0));
-    if (over) return toast(`${over}: teacher sales (${tot[over]}) cannot exceed tickets received (${recBy[over] || 0}).`, false);
+  $('#ad').onclick = () => { T.push(blank()); teachView(); scrollTo({top:document.body.scrollHeight, behavior:'smooth'}); };
+  $('#sv').onclick = async () => {
+    const rows = T.filter(t => t.teacher.trim() || t.sold !== '' || t.designation || t.category || t.shift);
+    const bad = rows.find(t => !t.teacher.trim() || !t.designation || !t.category || !t.shift || t.sold === '');
+    if (bad) return toast('Complete name, designation, category, shift and sale in every row.', false);
+    const recBy = {}, tot = {}; S.alloc.filter(own).forEach(x => { const k = x.category + '|' + x.shift; recBy[k] = (recBy[k] || 0) + num(x.received); });
+    rows.forEach(x => { const k = x.category + '|' + x.shift; tot[k] = (tot[k] || 0) + num(x.sold); });
+    const over = Object.keys(tot).find(k => tot[k] > (recBy[k] || 0));
+    if (over) return toast(`${over.replace('|', ' ')}: teacher sales (${tot[over]}) cannot exceed tickets received (${recBy[over] || 0}).`, false);
     wait(true, 'Saving teacher sales');
     const r = await api('saveTeachers', {name:S.user.name, pin:S.pin, rows});
     if (!r.ok) { wait(false); return toast(r.error, false); }
     await reload(); wait(false); teachView();
-    done('Teacher sales saved!', rows.length + ' rows updated Database · ' + (r.time || ''));
+    done('Teacher sales saved!', rows.length + ' rows updated in Google Sheet · ' + (r.time || ''));
   };
 }
 
