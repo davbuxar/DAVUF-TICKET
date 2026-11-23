@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3730a3">
-<title>DAV Ticket Stock Manager</title>
+<title>DAVUF-2026 BZ-J Tickets</title>
 <link rel="icon" href="https://davrecruit.davcmc.in/CBT/logo.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -139,14 +139,14 @@ body{background:radial-gradient(900px 400px at 0 0,rgba(99,102,241,.16),transpar
  <div class="blob"></div><div class="blob"></div>
  <div class="lcard">
   <img src="https://davrecruit.davcmc.in/CBT/logo.png" alt="DAV logo">
-  <h1>Ticket Stock Manager</h1><p>Sign in to record and track event ticket sales</p>
+  <h1>Ticket (BIHAR ZONE-J)</h1><p>Sign in to record and track event ticket sales</p>
   <label>User name</label>
   <select id="uSel"><option>Loading users…</option></select>
   <label>PIN</label>
   <div class="pw"><input id="pin" type="text" inputmode="numeric" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Enter your PIN"><span id="eye">👁</span></div>
   <div id="lerr" class="err" hidden></div>
   <button id="lbtn" class="btn big">Sign in</button>
-  <div id="demoNote" class="demo" hidden>Demo mode: set API_URL in index.html to use your Google Sheet.<br>Try Rajesh Kumar / 1234 or Admin / 0000</div>
+  <div id="demoNote" class="demo" hidden>Demo mode: set API_URL in index.html to use your Database.<br>Try Rajesh Kumar / 1234 or Admin / 0000</div>
  </div>
 </section>
 
@@ -166,7 +166,7 @@ body{background:radial-gradient(900px 400px at 0 0,rgba(99,102,241,.16),transpar
  </nav>
  <main id="view"></main>
 </div>
-<div id="wait"><div class="wb"><div class="ring"></div><b id="wm" class="dots">Please wait</b><small>Talking to Google Sheet</small></div></div>
+<div id="wait"><div class="wb"><div class="ring"></div><b id="wm" class="dots">Please wait</b><small>डेटाबेस से डा जा रहा है</small></div></div>
 <div id="okm"><div class="wb"><div class="tick"><svg viewBox="0 0 52 52"><path d="M14 27l8 8 16-17"/></svg></div><h3 id="okt">Saved!</h3><p id="okp"></p><button class="btn" id="okb">Done</button></div></div>
 <div id="toast"></div>
 
@@ -400,7 +400,7 @@ function salesView() {
     const r = await api('saveSales', {name:S.user.name, pin:S.pin, rows:data});
     if (!r.ok) { wait(false); return toast(r.error, false); }
     await reload(); wait(false); salesView();
-    done('Ticket sales saved!', data.length + ' rows updated in Google Sheet · ' + (r.time || ''));
+    done('Ticket sales saved!', data.length + ' rows updated Database · ' + (r.time || ''));
   };
 }
 
@@ -486,7 +486,7 @@ function teachView() {
     const r = await api('saveTeachers', {name:S.user.name, pin:S.pin, rows});
     if (!r.ok) { wait(false); return toast(r.error, false); }
     await reload(); wait(false); teachView();
-    done('Teacher sales saved!', rows.length + ' rows updated in Google Sheet · ' + (r.time || ''));
+    done('Teacher sales saved!', rows.length + ' rows updated in Database · ' + (r.time || ''));
   };
 }
 
