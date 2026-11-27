@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3730a3">
-<title>DAVUF-2026 BZ-J Tickets</title>
+<title>DAV Ticket Stock Manager</title>
 <link rel="icon" href="https://davrecruit.davcmc.in/CBT/logo.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -131,7 +131,7 @@ body{background:radial-gradient(900px 400px at 0 0,rgba(99,102,241,.16),transpar
 .sbar{position:sticky;bottom:calc(68px + env(safe-area-inset-bottom));z-index:15;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:20px;background:var(--card);border:1px solid var(--bd);box-shadow:0 10px 30px rgba(79,70,229,.25)}
 .gtt{font-size:12px;color:var(--mut)}.gtt b{color:var(--p);font-size:17px;margin-left:4px}.gtt span{margin-left:12px}
 @media(min-width:760px){.sbar{bottom:14px}}
-.shc{font-weight:700;font-size:12px;white-space:nowrap}.dban{cursor:pointer;user-select:none}.pill{display:inline-block;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#6366f1,#ec4899)}.lockb{border-left:6px solid #ef4444}.openb{border-left:6px solid #10b981}.lockb .pill{background:#ef4444}nav button{font-size:10.5px}</style>
+.shc{font-weight:700;font-size:12px;white-space:nowrap}.dban{cursor:pointer;user-select:none}.pill{display:inline-block;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#6366f1,#ec4899)}.lockb{border-left:6px solid #ef4444}.openb{border-left:6px solid #10b981}.lockb .pill{background:#ef4444}nav button{font-size:10.5px}.exg{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn.xl{background:linear-gradient(135deg,#059669,#10b981);box-shadow:0 6px 18px rgba(5,150,105,.35)}.btn.pdf{background:linear-gradient(135deg,#dc2626,#f97316);box-shadow:0 6px 18px rgba(220,38,38,.3)}@media(max-width:420px){.exg{grid-template-columns:1fr}}</style>
 </head>
 <body>
 
@@ -139,14 +139,14 @@ body{background:radial-gradient(900px 400px at 0 0,rgba(99,102,241,.16),transpar
  <div class="blob"></div><div class="blob"></div>
  <div class="lcard">
   <img src="https://davrecruit.davcmc.in/CBT/logo.png" alt="DAV logo">
-  <h1>Ticket (BIHAR ZONE-J)</h1><p>Sign in to record and track event ticket sales</p>
+  <h1>Ticket Stock Manager</h1><p>Sign in to record and track event ticket sales</p>
   <label>User name</label>
   <select id="uSel"><option>Loading users…</option></select>
   <label>PIN</label>
   <div class="pw"><input id="pin" type="text" inputmode="numeric" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Enter your PIN"><span id="eye">👁</span></div>
   <div id="lerr" class="err" hidden></div>
   <button id="lbtn" class="btn big">Sign in</button>
-  <div id="demoNote" class="demo" hidden>Demo mode: set API_URL in index.html to use your Database.<br>Try Rajesh Kumar / 1234 or Admin / 0000</div>
+  <div id="demoNote" class="demo" hidden>Demo mode: set API_URL in index.html to use your Google Sheet.<br>Try Rajesh Kumar / 1234 or Admin / 0000</div>
  </div>
 </section>
 
@@ -166,7 +166,7 @@ body{background:radial-gradient(900px 400px at 0 0,rgba(99,102,241,.16),transpar
  </nav>
  <main id="view"></main>
 </div>
-<div id="wait"><div class="wb"><div class="ring"></div><b id="wm" class="dots">Please wait</b><small>डेटाबेस से डा जा रहा है</small></div></div>
+<div id="wait"><div class="wb"><div class="ring"></div><b id="wm" class="dots">Please wait</b><small>Talking to Google Sheet</small></div></div>
 <div id="okm"><div class="wb"><div class="tick"><svg viewBox="0 0 52 52"><path d="M14 27l8 8 16-17"/></svg></div><h3 id="okt">Saved!</h3><p id="okp"></p><button class="btn" id="okb">Done</button></div></div>
 <div id="toast"></div>
 
@@ -346,7 +346,11 @@ function dashboard() {
    <div class="card"><h2>🥧 Revenue share</h2><div class="cv"><canvas id="c2"></canvas></div></div></div>
   <div class="card"><h2>🏆 Top ticket seller · school wise</h2>
    ${tops.length ? tops.map((x, i) => `<div class="top" style="animation-delay:${i * .08}s"><span class="tr">${['🥇','🥈','🥉'][i] || '⭐'}</span><div><b>${x.teacher}</b><small>${x.des} · ${x.school}</small></div><div class="n">${x.sold}<small>${INR(x.amt)}</small></div></div>`).join('') : '<div class="empty">No teacher sales recorded yet. Add them in the Teacher sales tab.</div>'}
-  </div>`;
+  </div>
+  <div class="card"><h2>📤 Export teacher list</h2><p class="meta">One record per teacher, highest sold first. Columns: S/N, School Name (User), Name, Designation, Sold. ${isAdmin() ? 'Includes all schools.' : 'Includes your school.'}</p>
+   <div class="exg"><button class="btn xl" data-x="xlsx|group">📗 Excel · School-wise</button><button class="btn xl" data-x="xlsx|all">📗 Excel · All combined</button>
+   <button class="btn pdf" data-x="pdf|group">📕 PDF · School-wise</button><button class="btn pdf" data-x="pdf|all">📕 PDF · All combined</button></div></div>`;
+  document.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { const [t, m] = b.dataset.x.split('|'); (t === 'xlsx' ? exportXlsx : exportPdf)(m); });
   document.querySelectorAll('[data-n]').forEach(e => countUp(e, +e.dataset.n, e.dataset.m));
   setTimeout(() => $('#pb').style.width = pct + '%', 80);
   $('#csv').onclick = () => { const cn = S.cfg.categories.map(c => c.category), L = [['School','Date',...cn,'Total sale','Total amount'].join(','), ...Q.map(x => ['"' + x.sc + '"', x.d, ...cn.map(c => x.q[c]), x.tot, x.amt].join(','))];
@@ -400,7 +404,7 @@ function salesView() {
     const r = await api('saveSales', {name:S.user.name, pin:S.pin, rows:data});
     if (!r.ok) { wait(false); return toast(r.error, false); }
     await reload(); wait(false); salesView();
-    done('Ticket sales saved!', data.length + ' rows updated Database · ' + (r.time || ''));
+    done('Ticket sales saved!', data.length + ' rows updated in Google Sheet · ' + (r.time || ''));
   };
 }
 
@@ -486,8 +490,123 @@ function teachView() {
     const r = await api('saveTeachers', {name:S.user.name, pin:S.pin, rows});
     if (!r.ok) { wait(false); return toast(r.error, false); }
     await reload(); wait(false); teachView();
-    done('Teacher sales saved!', rows.length + ' rows updated in Database · ' + (r.time || ''));
+    done('Teacher sales saved!', rows.length + ' rows updated in Google Sheet · ' + (r.time || ''));
   };
+}
+
+/* ---------- export teacher list (Excel / PDF) ---------- */
+const EXJS = 'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';
+const JSPDF = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+const ATBL = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js';
+const LOGO_URL = 'https://davrecruit.davcmc.in/CBT/logo.png';   // also tries logo.png placed next to index.html (recommended)
+const lib = u => new Promise((res, rej) => { if (lib.c[u]) return res(); const e = document.createElement('script'); e.src = u; e.onload = () => { lib.c[u] = 1; res(); }; e.onerror = () => rej(new Error('Could not load export library. Check internet connection.')); document.head.appendChild(e); });
+lib.c = {};
+async function logoData() {
+  if (logoData.v !== undefined) return logoData.v;
+  for (const u of ['logo.png', LOGO_URL]) {
+    try {
+      const r = await fetch(u, {mode:'cors'}); if (!r.ok) continue;
+      const b = await r.blob(); if (!/^image\//.test(b.type)) continue;
+      const url = await new Promise(ok => { const f = new FileReader(); f.onload = () => ok(f.result); f.readAsDataURL(b); });
+      const ratio = await new Promise(ok => { const i = new Image(); i.onload = () => ok(i.width / i.height || 1); i.onerror = () => ok(1); i.src = url; });
+      return logoData.v = {url, fmt:/jpe?g/.test(b.type) ? 'JPEG' : 'PNG', ratio};
+    } catch (e) {}
+  }
+  return logoData.v = null;
+}
+function teacherList() {
+  const m = {};
+  scope(S.teachers).forEach(t => { const k = t.school + '|' + t.teacher; const o = m[k] ||= {school:t.school, user:t.user, name:t.teacher, des:t.designation, sold:0}; o.sold += num(t.sold); o.des = t.designation; });
+  return Object.values(m).sort((a, b) => b.sold - a.sold || a.name.localeCompare(b.name));
+}
+function teacherGroups(L) {
+  const g = {}; L.forEach(x => { const o = g[x.school] ||= {school:x.school, user:x.user, list:[], total:0}; o.list.push(x); o.total += x.sold; });
+  return Object.values(g).sort((a, b) => b.total - a.total || a.school.localeCompare(b.school));
+}
+const tLabel = x => `${x.school} (${x.user})`;
+const stamp = () => new Date().toLocaleString('en-IN', {dateStyle:'medium', timeStyle:'short'});
+const subTitle = mode => (mode === 'all' ? 'All schools combined' : 'School-wise') + ' · ' + (isAdmin() ? 'All schools' : S.user.school) + ' · sorted by tickets sold (highest first)';
+function dl(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { a.remove(); URL.revokeObjectURL(a.href); }, 800); }
+
+async function exportXlsx(mode) {
+  const L = teacherList(); if (!L.length) return toast('No teacher sales to export yet.', false);
+  wait(true, 'Preparing Excel file');
+  try {
+    await lib(EXJS); const lg = await logoData();
+    const wb = new ExcelJS.Workbook(); wb.creator = 'DAV Ticket Stock Manager'; wb.created = new Date();
+    const ws = wb.addWorksheet(mode === 'all' ? 'Combined' : 'School-wise', {views:[{state:'frozen', ySplit:5}], properties:{tabColor:{argb:'FF4F46E5'}}, pageSetup:{orientation:'portrait', paperSize:9, fitToPage:true, fitToWidth:1, fitToHeight:0, printTitlesRow:'5:5'}});
+    ws.headerFooter.oddFooter = '&LDAV Ticket Stock Manager&CPage &P of &N&R&D';
+    ws.columns = [{width:10}, {width:46}, {width:32}, {width:22}, {width:11}];
+    [1, 2, 3].forEach(r => ws.getRow(r).height = 24); ws.getRow(5).height = 26;
+    ['B1:E1', 'B2:E2', 'B3:E3'].forEach(r => ws.mergeCells(r));
+    Object.assign(ws.getCell('B1'), {value:'Teacher Ticket Sales Report'}); ws.getCell('B1').font = {name:'Arial', size:18, bold:true, color:{argb:'FF312E81'}};
+    ws.getCell('B2').value = subTitle(mode); ws.getCell('B2').font = {name:'Arial', size:10, color:{argb:'FF475569'}};
+    ws.getCell('B3').value = 'Generated: ' + stamp() + ' · By: ' + S.user.name; ws.getCell('B3').font = {name:'Arial', size:9, italic:true, color:{argb:'FF64748B'}};
+    ['B1', 'B2', 'B3'].forEach(c => ws.getCell(c).alignment = {vertical:'middle', indent:1});
+    if (lg) { const id = wb.addImage({base64:lg.url, extension:lg.fmt === 'JPEG' ? 'jpeg' : 'png'}); ws.addImage(id, {tl:{col:0.12, row:0.1}, ext:{width:Math.min(70, 62 * lg.ratio), height:62}}); }
+    const thin = {style:'thin', color:{argb:'FFCBD5E1'}}, bd = {top:thin, left:thin, bottom:thin, right:thin};
+    const fmtRow = (row, o = {}) => row.eachCell({includeEmpty:true}, (c, n) => {
+      c.border = bd; c.alignment = {vertical:'middle', wrapText:true, horizontal:(n === 1 || n === 5) ? 'center' : 'left', ...(o.al ? {horizontal:o.al} : {})};
+      if (o.bg) c.fill = {type:'pattern', pattern:'solid', fgColor:{argb:o.bg}};
+      c.font = {name:'Arial', size:o.size || 10, bold:!!o.bold, color:{argb:o.color || 'FF1E293B'}}; });
+    const hr = ws.getRow(5); hr.values = ['S/N', 'School Name (User)', 'Name of Teacher', 'Designation', 'Sold']; fmtRow(hr, {bg:'FF4338CA', bold:true, color:'FFFFFFFF', size:11, al:'center'});
+    let r = 6;
+    if (mode === 'all') {
+      L.forEach((x, i) => { const row = ws.getRow(r++); row.values = [i + 1, tLabel(x), x.name, x.des, x.sold]; row.height = 20; fmtRow(row, {bg:i < 3 ? 'FFFEF3C7' : (i % 2 ? 'FFF8FAFC' : 'FFFFFFFF'), bold:i < 3}); });
+    } else {
+      teacherGroups(L).forEach(g => {
+        ws.mergeCells(`A${r}:E${r}`); const b = ws.getRow(r++); b.getCell(1).value = `${g.school} (${g.user})   ·   Teachers: ${g.list.length}   ·   Total sold: ${g.total}`; b.height = 24; fmtRow(b, {bg:'FFE0E7FF', bold:true, color:'FF312E81', size:11, al:'left'});
+        g.list.forEach((x, i) => { const row = ws.getRow(r++); row.values = [i + 1, tLabel(x), x.name, x.des, x.sold]; row.height = 20; fmtRow(row, {bg:i % 2 ? 'FFF8FAFC' : 'FFFFFFFF'}); });
+        ws.mergeCells(`A${r}:D${r}`); const t = ws.getRow(r++); t.getCell(1).value = 'School total'; t.getCell(5).value = g.total; fmtRow(t, {bg:'FFF1F5F9', bold:true}); t.getCell(1).alignment = {horizontal:'right', vertical:'middle'};
+        r++;
+      });
+    }
+    ws.mergeCells(`A${r}:D${r}`); const tr = ws.getRow(r); tr.getCell(1).value = 'GRAND TOTAL'; tr.getCell(5).value = L.reduce((a, x) => a + x.sold, 0); tr.height = 24;
+    fmtRow(tr, {bg:'FF4338CA', bold:true, color:'FFFFFFFF', size:11}); tr.getCell(1).alignment = {horizontal:'right', vertical:'middle'};
+    const name = `Teacher-Sales-${mode === 'all' ? 'Combined' : 'School-wise'}.xlsx`;
+    dl(new Blob([await wb.xlsx.writeBuffer()], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}), name);
+    wait(false); done('Excel exported!', name + (lg ? '' : ' (logo not embedded: add logo.png to your GitHub repo)'));
+  } catch (e) { wait(false); toast(e.message || 'Export failed', false); }
+}
+
+async function exportPdf(mode) {
+  const L = teacherList(); if (!L.length) return toast('No teacher sales to export yet.', false);
+  wait(true, 'Preparing PDF file');
+  try {
+    await lib(JSPDF); await lib(ATBL); const lg = await logoData();
+    const {jsPDF} = window.jspdf, doc = new jsPDF({unit:'pt', format:'a4'}), W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
+    const lh = 46, lw = lg ? Math.min(70, lh * lg.ratio) : 0, tx = 36 + (lg ? lw + 12 : 0);
+    const header = () => {
+      if (lg) doc.addImage(lg.url, lg.fmt, 36, 20, lw, lh);
+      doc.setFont('helvetica', 'bold').setFontSize(17).setTextColor(49, 46, 129).text('Teacher Ticket Sales Report', tx, 40);
+      doc.setFont('helvetica', 'normal').setFontSize(8.5).setTextColor(71, 85, 105).text(subTitle(mode), tx, 56, {maxWidth:W - tx - 36});
+      doc.setFontSize(8).setTextColor(100, 116, 139).text('Generated: ' + stamp(), W - 36, 28, {align:'right'});
+      doc.setFillColor(79, 70, 229).rect(36, 72, W - 72, 3, 'F'); doc.setFillColor(236, 72, 153).rect(W - 150, 72, 114, 3, 'F');
+    };
+    const total = L.reduce((a, x) => a + x.sold, 0), body = [], C = {halign:'center'};
+    if (mode === 'all') L.forEach((x, i) => body.push([i + 1, tLabel(x), x.name, x.des, x.sold]));
+    else teacherGroups(L).forEach(g => {
+      body.push([{content:`${g.school} (${g.user})   ·   Teachers: ${g.list.length}   ·   Total sold: ${g.total}`, colSpan:5, styles:{fillColor:[224, 231, 255], textColor:[49, 46, 129], fontStyle:'bold', fontSize:9.5}}]);
+      g.list.forEach((x, i) => body.push([i + 1, tLabel(x), x.name, x.des, x.sold]));
+      body.push([{content:'School total', colSpan:4, styles:{halign:'right', fontStyle:'bold', fillColor:[241, 245, 249]}}, {content:String(g.total), styles:{...C, fontStyle:'bold', fillColor:[241, 245, 249]}}]);
+    });
+    doc.autoTable({
+      head:[['S/N', 'School Name (User)', 'Name of Teacher', 'Designation', 'Sold']], body,
+      foot:[[{content:'GRAND TOTAL', colSpan:4, styles:{halign:'right'}}, {content:String(total), styles:C}]],
+      startY:90, margin:{top:90, left:36, right:36, bottom:44}, showFoot:'lastPage', theme:'grid',
+      styles:{font:'helvetica', fontSize:9, cellPadding:5, lineColor:[203, 213, 225], lineWidth:.5, valign:'middle', textColor:[30, 41, 59]},
+      headStyles:{fillColor:[67, 56, 202], textColor:255, halign:'center', fontStyle:'bold', fontSize:9.5},
+      footStyles:{fillColor:[67, 56, 202], textColor:255, fontStyle:'bold', fontSize:10},
+      alternateRowStyles:{fillColor:[248, 250, 252]},
+      columnStyles:{0:{...C, cellWidth:34}, 1:{cellWidth:'auto'}, 2:{cellWidth:120}, 3:{cellWidth:80}, 4:{...C, cellWidth:44, fontStyle:'bold'}},
+      didParseCell:d => { if (mode === 'all' && d.section === 'body' && d.row.index < 3) { d.cell.styles.fillColor = [254, 243, 199]; d.cell.styles.fontStyle = 'bold'; } },
+      didDrawPage:header
+    });
+    const n = doc.getNumberOfPages();
+    for (let i = 1; i <= n; i++) { doc.setPage(i); doc.setFont('helvetica', 'normal').setFontSize(8).setTextColor(100, 116, 139); doc.text('DAV Ticket Stock Manager', 36, H - 22); doc.text(`Page ${i} of ${n}`, W - 36, H - 22, {align:'right'}); }
+    const name = `Teacher-Sales-${mode === 'all' ? 'Combined' : 'School-wise'}.pdf`;
+    doc.save(name); wait(false); done('PDF exported!', name + (lg ? '' : ' (logo not embedded: add logo.png to your GitHub repo)'));
+  } catch (e) { wait(false); toast(e.message || 'Export failed', false); }
 }
 
 /* ---------- events ---------- */
