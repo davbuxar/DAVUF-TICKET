@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3730a3">
-<title>DAV Ticket Stock Manager</title>
+<title>DAV-UF-26 Tickets</title>
 <link rel="icon" href="https://davrecruit.davcmc.in/CBT/logo.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -137,7 +137,12 @@ body{background:radial-gradient(900px 400px at 0 0,rgba(99,102,241,.16),transpar
 .si{flex:1;min-width:0}.si b{display:block;font-size:14px}.si small{display:block;opacity:.92;font-size:11px}.sch .pill{background:rgba(255,255,255,.22)}
 .upd{font-size:9px;color:var(--mut);padding:5px 14px 4px;text-align:right;font-style:italic}
 .rt th{font-size:11px;padding:8px 5px}.rt th small{font-weight:400;opacity:.9;font-size:9px}.rt td{padding:6px 5px;white-space:nowrap}
-.rv{color:#059669;font-weight:700}.sv{color:#d97706;font-weight:700}.sl{color:var(--mut);margin:0 3px}</style>
+.rv{color:#059669;font-weight:700}.sv{color:#d97706;font-weight:700}.sl{color:var(--mut);margin:0 3px}#sm{position:fixed;inset:0;z-index:90;display:none;background:rgba(15,10,50,.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);overflow:auto;overscroll-behavior:contain}#sm.on{display:block;animation:fi .25s}
+.sbox{background:var(--bg);max-width:1150px;margin:18px auto;border-radius:26px;padding:14px;min-height:60vh;animation:pop .4s cubic-bezier(.2,.9,.3,1.2)}
+.mh{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;padding:16px;border-radius:20px;color:#fff;background:linear-gradient(120deg,#4338ca,#7c3aed,#db2777)}.mh h2{font-size:17px}.mh small{opacity:.92;font-size:11.5px}
+.slink{cursor:pointer;color:var(--p);text-decoration:underline dotted;text-underline-offset:3px}.slink:hover{filter:brightness(1.2)}
+@media(max-width:700px){.sbox{margin:0;border-radius:0;min-height:100vh}}
+</style>
 </head>
 <body>
 
@@ -174,11 +179,12 @@ body{background:radial-gradient(900px 400px at 0 0,rgba(99,102,241,.16),transpar
 </div>
 <div id="wait"><div class="wb"><div class="ring"></div><b id="wm" class="dots">Please wait</b><small>Talking to Google Sheet</small></div></div>
 <div id="okm"><div class="wb"><div class="tick"><svg viewBox="0 0 52 52"><path d="M14 27l8 8 16-17"/></svg></div><h3 id="okt">Saved!</h3><p id="okp"></p><button class="btn" id="okb">Done</button></div></div>
+<div id="sm"><div class="sbox" id="smb"></div></div>
 <div id="toast"></div>
 
 <script>
 /* ====== SETTINGS ====== */
-const API_URL = ("https://script.google.com/macros/s/AKfycbzYps1e-n-Xn_NounCr-mmXDBbTeMviB_BqZlB7_6sOgKG0U-Tpyj7exj8VpgmW3VRt/exec".match(/https:\/\/script\.google\.com\/macros\/s\/[^\/\s"]+\/exec/) || [""])[0];   // paste your Web App URL between the quotes
+const API_URL = ("PASTE_YOUR_EXEC_URL_HERE".match(/https:\/\/script\.google\.com\/macros\/s\/[^\/\s"]+\/exec/) || [""])[0];   // paste your Web App URL between the quotes
 const DEMO = !API_URL;
 /* ====================== */
 const $ = s => document.querySelector(s);
@@ -648,8 +654,8 @@ function schoolReportCard() {
   const R = schoolReport(), SH = S.cfg.shifts, NC = S.cfg.categories.length, G = grandTot(R);
   const rs = (r, s) => `<span class="rv">${r}</span><span class="sl">/</span><span class="sv">${s}</span>`;
   const cards = R.map((g, i) => { const pct = g.tot.tg ? Math.round(g.tot.ac * 100 / g.tot.tg) : 0;
-    return `<div class="sc" data-q="${esc((g.school + ' ' + g.code).toLowerCase())}">
-     <div class="sch"><span class="no">${i + 1}</span><div class="si"><b>${esc(g.school || '—')}</b><small>User / School code: <b>${esc(g.code)}</b></small></div><span class="pill">${pct}% achieved</span></div>
+    return `<div class="sc" data-code="${esc(g.code)}" data-q="${esc((g.school + ' ' + g.code).toLowerCase())}">
+     <div class="sch"><span class="no">${i + 1}</span><div class="si"><b><a class="slink" data-sc="${esc(g.code)}">${esc(g.school || '—')}</a></b><small>User / School code: <b>${esc(g.code)}</b></small></div><span class="pill">${pct}% achieved</span></div>
      <div class="upd">Updated: ${fmtTs(g.upd)}</div>
      <div class="tw"><table class="rt"><thead><tr><th>Date</th><th>Category</th>${SH.map(h => `<th>${esc(shLabel(h))}<br><small>Rec / Sale</small></th>`).join('')}<th>Total<br><small>Rec / Sale</small></th><th>Amount<br><small>Target / Achieved</small></th></tr></thead><tbody>
      ${g.rows.map((r, k) => `<tr>${k % NC === 0 ? `<td class="c-d" rowspan="${NC}">${r.d}</td>` : ''}<td>${chip(r.c)}</td>${r.sh.map(x => `<td>${rs(x.r, x.s)}</td>`).join('')}<td class="c-k">${rs(r.tr, r.ts)}</td><td class="c-a">${INR(r.tg)} / <b>${INR(r.ac)}</b></td></tr>`).join('')}
@@ -777,7 +783,40 @@ async function exportSchoolPdf() {
   } catch (e) { wait(false); toast(e.message || 'Export failed', false); }
 }
 
+/* ---------- admin: tap a school to see its data and graphs ---------- */
+let mch = [];
+function closeSchool() { mch.forEach(c => c.destroy()); mch = []; $('#sm').classList.remove('on'); document.body.style.overflow = ''; }
+function openSchool(code) {
+  const g = schoolReport().find(x => x.code === code), card = document.querySelector(`.sc[data-code="${CSS.escape(code)}"]`); if (!g) return;
+  const SH = S.cfg.shifts, CT = S.cfg.categories, pct = g.tot.tg ? Math.round(g.tot.ac * 100 / g.tot.tg) : 0, tm = {};
+  S.teachers.filter(x => x.user === code).forEach(t => { const o = tm[t.teacher] ||= {name:t.teacher, des:t.designation, sold:0}; o.sold += num(t.sold); o.des = t.designation; });
+  const TL = Object.values(tm).sort((a, b) => b.sold - a.sold);
+  $('#smb').innerHTML = `
+   <div class="mh"><div><h2>🏫 ${esc(g.school || '—')}</h2><small>School code: <b>${esc(g.code)}</b> · Updated: ${fmtTs(g.upd)}</small></div><button class="ib" id="smx">✕</button></div>
+   <div class="kpis"><div class="k k1"><small>Received</small><b>${fmtN(g.tot.tr)}</b></div><div class="k k2"><small>Sold</small><b>${fmtN(g.tot.ts)}</b></div>
+    <div class="k k3"><small>In stock</small><b>${fmtN(g.tot.tr - g.tot.ts)}</b></div><div class="k k4"><small>Achieved · target ${INR(g.tot.tg)}</small><b>${INR(g.tot.ac)}</b></div></div>
+   <div class="card"><h2>🎯 Target achieved <span class="sp"></span><span style="color:var(--p)">${pct}%</span></h2><div class="bar"><div id="mpb"></div></div></div>
+   <div class="cg"><div class="card"><h2>📊 Received vs sold by category</h2><div class="cv"><canvas id="m1"></canvas></div></div>
+    <div class="card"><h2>🕐 Sold by shift and date</h2><div class="cv"><canvas id="m2"></canvas></div></div></div>
+   <div class="card"><h2>📋 Detailed data</h2><p class="meta">Received / Sale by shift · Amount Target / Achieved</p>${card ? card.querySelector('.tw').outerHTML : ''}</div>
+   <div class="card"><h2>👩‍🏫 Teachers</h2>${TL.length ? `<div class="tw"><table><thead><tr><th>S/N</th><th>Name</th><th>Designation</th><th>Sold</th></tr></thead><tbody>${TL.map((t, i) => `<tr><td>${i + 1}</td><td style="text-align:left">${esc(t.name)}</td><td>${esc(t.des)}</td><td class="c-s"><b>${t.sold}</b></td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">No teacher sales recorded for this school.</div>'}</div>`;
+  $('#sm').classList.add('on'); document.body.style.overflow = 'hidden'; $('#sm').scrollTop = 0; $('#smx').onclick = closeSchool;
+  setTimeout(() => { const p = $('#mpb'); if (p) p.style.width = Math.min(100, pct) + '%'; }, 80);
+  if (!window.Chart) return;
+  Chart.defaults.font.family = 'Poppins'; Chart.defaults.color = getComputedStyle(document.body).color;
+  const dc = ['#6366f1', '#ec4899', '#f59e0b', '#10b981'];
+  mch.push(new Chart($('#m1'), {type:'bar', data:{labels:CT.map(c => c.category), datasets:[
+    {label:'Received', backgroundColor:'#10b981', borderRadius:6, data:CT.map(c => sum(g.rows.filter(r => r.c === c.category), r => r.tr))},
+    {label:'Sold', backgroundColor:'#f97316', borderRadius:6, data:CT.map(c => sum(g.rows.filter(r => r.c === c.category), r => r.ts))}]},
+    options:{maintainAspectRatio:false, scales:{y:{beginAtZero:true}}, plugins:{legend:{position:'bottom'}}, animation:{duration:1100}}}));
+  mch.push(new Chart($('#m2'), {type:'bar', data:{labels:SH.map(shLabel), datasets:S.cfg.dates.map((d, i) => ({label:d, backgroundColor:dc[i % 4], borderRadius:6, data:SH.map((h, k) => sum(g.rows.filter(r => r.d === d), r => r.sh[k].s))}))},
+    options:{maintainAspectRatio:false, scales:{y:{beginAtZero:true}}, plugins:{legend:{position:'bottom'}}, animation:{duration:1300}}}));
+}
+document.addEventListener('click', e => { const a = e.target.closest('[data-sc]'); if (a) openSchool(a.dataset.sc); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSchool(); });
+
 /* ---------- events ---------- */
+$('#sm').onclick = e => { if (e.target.id === 'sm') closeSchool(); };
 $('#lbtn').onclick = login;
 $('#pin').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 $('#eye').onclick = () => $('#pin').classList.toggle('show');
