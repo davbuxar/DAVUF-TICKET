@@ -131,7 +131,13 @@ body{background:radial-gradient(900px 400px at 0 0,rgba(99,102,241,.16),transpar
 .sbar{position:sticky;bottom:calc(68px + env(safe-area-inset-bottom));z-index:15;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:20px;background:var(--card);border:1px solid var(--bd);box-shadow:0 10px 30px rgba(79,70,229,.25)}
 .gtt{font-size:12px;color:var(--mut)}.gtt b{color:var(--p);font-size:17px;margin-left:4px}.gtt span{margin-left:12px}
 @media(min-width:760px){.sbar{bottom:14px}}
-.shc{font-weight:700;font-size:12px;white-space:nowrap}.dban{cursor:pointer;user-select:none}.pill{display:inline-block;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#6366f1,#ec4899)}.lockb{border-left:6px solid #ef4444}.openb{border-left:6px solid #10b981}.lockb .pill{background:#ef4444}nav button{font-size:10.5px}.exg{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn.xl{background:linear-gradient(135deg,#059669,#10b981);box-shadow:0 6px 18px rgba(5,150,105,.35)}.btn.pdf{background:linear-gradient(135deg,#dc2626,#f97316);box-shadow:0 6px 18px rgba(220,38,38,.3)}@media(max-width:420px){.exg{grid-template-columns:1fr}}</style>
+.shc{font-weight:700;font-size:12px;white-space:nowrap}.dban{cursor:pointer;user-select:none}.pill{display:inline-block;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#6366f1,#ec4899)}.lockb{border-left:6px solid #ef4444}.openb{border-left:6px solid #10b981}.lockb .pill{background:#ef4444}nav button{font-size:10.5px}.exg{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn.xl{background:linear-gradient(135deg,#059669,#10b981);box-shadow:0 6px 18px rgba(5,150,105,.35)}.btn.pdf{background:linear-gradient(135deg,#dc2626,#f97316);box-shadow:0 6px 18px rgba(220,38,38,.3)}@media(max-width:420px){.exg{grid-template-columns:1fr}}.sc{border-radius:18px;overflow:hidden;border:1px solid var(--bd);margin-bottom:14px;background:var(--card);box-shadow:var(--sh)}
+.sch{display:flex;align-items:center;gap:10px;padding:12px 14px;color:#fff;background:linear-gradient(120deg,#4338ca,#7c3aed,#db2777)}
+.sch .no{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.25);display:grid;place-items:center;font-weight:700}
+.si{flex:1;min-width:0}.si b{display:block;font-size:14px}.si small{display:block;opacity:.92;font-size:11px}.sch .pill{background:rgba(255,255,255,.22)}
+.upd{font-size:9px;color:var(--mut);padding:5px 14px 4px;text-align:right;font-style:italic}
+.rt th{font-size:11px;padding:8px 5px}.rt th small{font-weight:400;opacity:.9;font-size:9px}.rt td{padding:6px 5px;white-space:nowrap}
+.rv{color:#059669;font-weight:700}.sv{color:#d97706;font-weight:700}.sl{color:var(--mut);margin:0 3px}</style>
 </head>
 <body>
 
@@ -172,7 +178,7 @@ body{background:radial-gradient(900px 400px at 0 0,rgba(99,102,241,.16),transpar
 
 <script>
 /* ====== SETTINGS ====== */
-const API_URL = ("https://script.google.com/macros/s/AKfycbxJch64-xuLhdXzUGPZSAth2bVyHT8ucaazfd8ba2e68JgU5X0CIjadVhn_QkD8s0x4/exec".match(/https:\/\/script\.google\.com\/macros\/s\/[^\/\s"]+\/exec/) || [""])[0];   // paste your Web App URL between the quotes
+const API_URL = ("https://script.google.com/macros/s/AKfycbzYps1e-n-Xn_NounCr-mmXDBbTeMviB_BqZlB7_6sOgKG0U-Tpyj7exj8VpgmW3VRt/exec".match(/https:\/\/script\.google\.com\/macros\/s\/[^\/\s"]+\/exec/) || [""])[0];   // paste your Web App URL between the quotes
 const DEMO = !API_URL;
 /* ====================== */
 const $ = s => document.querySelector(s);
@@ -208,7 +214,7 @@ function mock(a, p) {
   if (a === 'init') return {ok:true, users:D.users.map(x=>({name:x.name,school:x.school}))};
   if (!u || u.pin !== String(p.pin)) return {ok:false, error:'Wrong PIN. Please try again.'};
   if (a === 'login') return {ok:true, user:{name:u.name,school:u.school,role:u.role}};
-  if (a === 'load') return {ok:true, cfg:{...D.cfg, maxAlloc:2}, alloc:D.alloc, sales:D.sales, teachers:D.teachers, allocLog:D.allocLog || []};
+  if (a === 'load') return {ok:true, cfg:{...D.cfg, maxAlloc:2}, alloc:D.alloc, sales:D.sales, teachers:D.teachers, allocLog:D.allocLog || [], users:u.role === 'Admin' ? D.users.map(x => ({name:x.name, school:x.school, role:x.role})) : []};
   if (a === 'saveAlloc') {
     D.allocLog = D.allocLog || []; let g = D.allocLog.find(x => x.user === u.name); if (!g) D.allocLog.push(g = {user:u.name, updates:0, lastupdated:''});
     if (g.updates >= 2) return {ok:false, error:'Allocation is locked. You have used all 2 updates.'};
@@ -341,6 +347,7 @@ function dashboard() {
    <div class="tw">${Q.length ? `<table id="sum"><thead><tr><th>School</th><th>Date</th>${S.cfg.categories.map(c => `<th style="background:${col(c.category)}">${c.category}</th>`).join('')}<th>Total sale</th><th>Total amount</th></tr></thead><tbody>
    ${Q.map(x => `<tr>${x.first ? `<td class="c-d sch" rowspan="${x.span}">${x.sc}</td>` : ''}<td>${x.d}</td>${S.cfg.categories.map(c => `<td class="c-s">${x.q[c.category]}</td>`).join('')}<td class="c-k">${x.tot}</td><td class="c-a">${INR(x.amt)}</td></tr>`).join('')}
    </tbody><tfoot><tr><td colspan="2">Total</td>${S.cfg.categories.map(c => `<td>${sum(Q, x => x.q[c.category])}</td>`).join('')}<td>${sum(Q, x => x.tot)}</td><td>${INR(sum(Q, x => x.amt))}</td></tr></tfoot></table>` : '<div class="empty">No sales saved yet. Add them in the Ticket sales tab.</div>'}</div></div>
+  ${isAdmin() ? schoolReportCard() : ''}
   <div class="card"><h2>🕐 Shift-wise sales <small style="font-weight:400;color:var(--mut)">sold / received</small></h2>${shiftMatrix()}</div>
   <div class="cg"><div class="card"><h2>📈 Daily sales by category</h2><div class="cv"><canvas id="c1"></canvas></div></div>
    <div class="card"><h2>🥧 Revenue share</h2><div class="cv"><canvas id="c2"></canvas></div></div></div>
@@ -350,7 +357,7 @@ function dashboard() {
   <div class="card"><h2>📤 Export teacher list</h2><p class="meta">One record per teacher, highest sold first. Columns: S/N, School Name (User), Name, Designation, Sold. ${isAdmin() ? 'Includes all schools.' : 'Includes your school.'}</p>
    <div class="exg"><button class="btn xl" data-x="xlsx|group">📗 Excel · School-wise</button><button class="btn xl" data-x="xlsx|all">📗 Excel · All combined</button>
    <button class="btn pdf" data-x="pdf|group">📕 PDF · School-wise</button><button class="btn pdf" data-x="pdf|all">📕 PDF · All combined</button></div></div>`;
-  document.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { const [t, m] = b.dataset.x.split('|'); (t === 'xlsx' ? exportXlsx : exportPdf)(m); });
+  document.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { const [t, m] = b.dataset.x.split('|'); ({xlsx:exportXlsx, pdf:exportPdf, rxlsx:exportSchoolXlsx, rpdf:exportSchoolPdf})[t](m); });
   document.querySelectorAll('[data-n]').forEach(e => countUp(e, +e.dataset.n, e.dataset.m));
   setTimeout(() => $('#pb').style.width = pct + '%', 80);
   $('#csv').onclick = () => { const cn = S.cfg.categories.map(c => c.category), L = [['School','Date',...cn,'Total sale','Total amount'].join(','), ...Q.map(x => ['"' + x.sc + '"', x.d, ...cn.map(c => x.q[c]), x.tot, x.amt].join(','))];
@@ -606,6 +613,167 @@ async function exportPdf(mode) {
     for (let i = 1; i <= n; i++) { doc.setPage(i); doc.setFont('helvetica', 'normal').setFontSize(8).setTextColor(100, 116, 139); doc.text('DAV Ticket Stock Manager', 36, H - 22); doc.text(`Page ${i} of ${n}`, W - 36, H - 22, {align:'right'}); }
     const name = `Teacher-Sales-${mode === 'all' ? 'Combined' : 'School-wise'}.pdf`;
     doc.save(name); wait(false); done('PDF exported!', name + (lg ? '' : ' (logo not embedded: add logo.png to your GitHub repo)'));
+  } catch (e) { wait(false); toast(e.message || 'Export failed', false); }
+}
+
+/* ---------- admin: school-wise report (screen + Excel + PDF) ---------- */
+const SH_TIME = {'Shift-1':'9:30', 'Shift-2':'11:15', 'Shift-3':'2:30', 'Shift-4':'5:15'};
+const shLabel = h => { const t = (S.cfg.shiftTimes && S.cfg.shiftTimes[h]) || SH_TIME[h]; return t ? `${h} (${t})` : h; };
+const esc = v => String(v).replace(/[&<>"]/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'}[c]));
+const fmtTs = t => t ? `${t.slice(8, 10)}-${t.slice(5, 7)}-${t.slice(0, 4)} ${t.slice(11, 16)}` : '—';
+const fmtN = n => num(n).toLocaleString('en-IN');
+const TINT = {Silver:'E2E8F0', Gold:'FEF3C7', Platinum:'EDE9FE', Diamond:'CFFAFE'};
+function schoolReport() {
+  const SH = S.cfg.shifts, CT = S.cfg.categories, M = {};
+  (S.users || []).filter(u => u.role !== 'Admin').forEach(u => M[u.name] = u.school);
+  [...S.alloc, ...S.sales, ...S.teachers].forEach(x => { if (x.user && !(x.user in M)) M[x.user] = x.school || ''; });
+  return Object.keys(M).sort().map(code => {
+    const A = S.alloc.filter(x => x.user === code), Sa = S.sales.filter(x => x.user === code);
+    const upd = [...Sa.map(x => x.timestamp), ...S.teachers.filter(x => x.user === code).map(x => x.timestamp), ...A.map(x => x.updated)].filter(Boolean).map(String).sort().pop() || '';
+    const tot = {sh:SH.map(() => ({r:0, s:0})), tr:0, ts:0, tg:0, ac:0}, rows = [];
+    S.cfg.dates.forEach(d => CT.forEach(c => {
+      const p = num(c.price), sh = SH.map(h => ({r:sum(A.filter(x => x.date === d && x.category === c.category && x.shift === h), x => x.received), s:sum(Sa.filter(x => x.date === d && x.category === c.category && x.shift === h), x => x.sold)}));
+      const tr = sum(sh, x => x.r), ts = sum(sh, x => x.s), row = {d, c:c.category, p, sh, tr, ts, tg:tr * p, ac:ts * p};
+      sh.forEach((x, i) => { tot.sh[i].r += x.r; tot.sh[i].s += x.s; }); tot.tr += tr; tot.ts += ts; tot.tg += row.tg; tot.ac += row.ac; rows.push(row);
+    }));
+    return {code, school:M[code], upd, rows, tot};
+  });
+}
+function grandTot(R) {
+  const g = {sh:S.cfg.shifts.map(() => ({r:0, s:0})), tr:0, ts:0, tg:0, ac:0};
+  R.forEach(x => { x.tot.sh.forEach((v, i) => { g.sh[i].r += v.r; g.sh[i].s += v.s; }); g.tr += x.tot.tr; g.ts += x.tot.ts; g.tg += x.tot.tg; g.ac += x.tot.ac; });
+  return g;
+}
+function schoolReportCard() {
+  const R = schoolReport(), SH = S.cfg.shifts, NC = S.cfg.categories.length, G = grandTot(R);
+  const rs = (r, s) => `<span class="rv">${r}</span><span class="sl">/</span><span class="sv">${s}</span>`;
+  const cards = R.map((g, i) => { const pct = g.tot.tg ? Math.round(g.tot.ac * 100 / g.tot.tg) : 0;
+    return `<div class="sc" data-q="${esc((g.school + ' ' + g.code).toLowerCase())}">
+     <div class="sch"><span class="no">${i + 1}</span><div class="si"><b>${esc(g.school || '—')}</b><small>User / School code: <b>${esc(g.code)}</b></small></div><span class="pill">${pct}% achieved</span></div>
+     <div class="upd">Updated: ${fmtTs(g.upd)}</div>
+     <div class="tw"><table class="rt"><thead><tr><th>Date</th><th>Category</th>${SH.map(h => `<th>${esc(shLabel(h))}<br><small>Rec / Sale</small></th>`).join('')}<th>Total<br><small>Rec / Sale</small></th><th>Amount<br><small>Target / Achieved</small></th></tr></thead><tbody>
+     ${g.rows.map((r, k) => `<tr>${k % NC === 0 ? `<td class="c-d" rowspan="${NC}">${r.d}</td>` : ''}<td>${chip(r.c)}</td>${r.sh.map(x => `<td>${rs(x.r, x.s)}</td>`).join('')}<td class="c-k">${rs(r.tr, r.ts)}</td><td class="c-a">${INR(r.tg)} / <b>${INR(r.ac)}</b></td></tr>`).join('')}
+     </tbody><tfoot><tr><td colspan="2">TOTAL</td>${g.tot.sh.map(x => `<td>${rs(x.r, x.s)}</td>`).join('')}<td>${rs(g.tot.tr, g.tot.ts)}</td><td>${INR(g.tot.tg)} / ${INR(g.tot.ac)}</td></tr></tfoot></table></div></div>`; }).join('');
+  return `<div class="card"><h2>🏫 School-wise report <span class="sp"></span><button class="btn xl" data-x="rxlsx|r" style="padding:8px 14px">📗 Excel</button><button class="btn pdf" data-x="rpdf|r" style="padding:8px 14px">📕 PDF</button></h2>
+   <p class="meta">${R.length} schools · Received <b class="rv">${G.tr}</b> / Sale <b class="sv">${G.ts}</b> · Target ${INR(G.tg)} / Achieved ${INR(G.ac)}. Each school shows its last update time.</p>
+   <input class="inp" style="text-align:left;margin-bottom:12px" placeholder="🔍 Search school name or code" oninput="document.querySelectorAll('.sc').forEach(c=>c.hidden=!c.dataset.q.includes(this.value.toLowerCase()))">
+   ${cards || '<div class="empty">No schools found.</div>'}</div>`;
+}
+const hexRgb = h => [0, 2, 4].map(i => parseInt(h.replace('#', '').slice(i, i + 2), 16));
+
+async function exportSchoolXlsx() {
+  const R = schoolReport(); if (!R.length) return toast('No school data to export yet.', false);
+  wait(true, 'Preparing Excel report');
+  try {
+    await lib(EXJS); const lg = await logoData();
+    const SH = S.cfg.shifts, CT = S.cfg.categories, NC = CT.length, N = 5 + SH.length * 2 + 4, G = grandTot(R);
+    const wb = new ExcelJS.Workbook(); wb.creator = 'DAV Ticket Stock Manager'; wb.created = new Date();
+    const ws = wb.addWorksheet('School Report', {views:[{state:'frozen', xSplit:5, ySplit:6}], properties:{tabColor:{argb:'FF7C3AED'}}, pageSetup:{orientation:'landscape', paperSize:9, fitToPage:true, fitToWidth:1, fitToHeight:0, printTitlesRow:'5:6'}});
+    ws.headerFooter.oddFooter = '&LDAV Ticket Stock Manager&CPage &P of &N&R&D';
+    ws.columns = [{width:7}, {width:36}, {width:13}, {width:12}, {width:12}, ...SH.flatMap(() => [{width:10}, {width:10}]), {width:10}, {width:10}, {width:14}, {width:14}];
+    [1, 2, 3].forEach(r => ws.getRow(r).height = 24);
+    for (const r of [1, 2, 3]) ws.mergeCells(r, 2, r, N);
+    ws.getCell('B1').value = 'School-wise Ticket Report'; ws.getCell('B1').font = {name:'Arial', size:20, bold:true, color:{argb:'FF312E81'}};
+    ws.getCell('B2').value = `Tickets Received / Sale by shift · Amount Target / Achieved · ${R.length} schools`; ws.getCell('B2').font = {name:'Arial', size:10, color:{argb:'FF475569'}};
+    ws.getCell('B3').value = 'Generated: ' + stamp() + ' · By: ' + S.user.name; ws.getCell('B3').font = {name:'Arial', size:9, italic:true, color:{argb:'FF64748B'}};
+    ['B1', 'B2', 'B3'].forEach(c => ws.getCell(c).alignment = {vertical:'middle', indent:1});
+    if (lg) { const id = wb.addImage({base64:lg.url, extension:lg.fmt === 'JPEG' ? 'jpeg' : 'png'}); ws.addImage(id, {tl:{col:0.1, row:0.1}, ext:{width:Math.min(80, 62 * lg.ratio), height:62}}); }
+    const thin = {style:'thin', color:{argb:'FFCBD5E1'}}, bd = {top:thin, left:thin, bottom:thin, right:thin};
+    const fill = c => ({type:'pattern', pattern:'solid', fgColor:{argb:c}});
+    const sty = (c, o = {}) => { c.border = bd; c.alignment = {vertical:'middle', horizontal:o.al || 'center', wrapText:true}; if (o.bg) c.fill = fill(o.bg); c.font = {name:'Arial', size:o.size || 9, bold:!!o.bold, color:{argb:o.color || 'FF1E293B'}}; };
+    // header (2 rows)
+    const h1 = ['S/N', 'SCHOOL NAME', 'USER (SCHOOL CODE)', 'DATE', 'CATEGORY', ...SH.flatMap(h => [shLabel(h), '']), 'TOTAL', '', 'AMOUNT', ''];
+    const h2 = ['', '', '', '', '', ...SH.flatMap(() => ['Received', 'Sale']), 'Received', 'Sale', 'Target', 'Achieved'];
+    ws.getRow(5).values = h1; ws.getRow(6).values = h2; ws.getRow(5).height = 30; ws.getRow(6).height = 20;
+    for (let c = 1; c <= 5; c++) ws.mergeCells(5, c, 6, c);
+    for (let i = 0; i <= SH.length + 1; i++) ws.mergeCells(5, 6 + i * 2, 5, 7 + i * 2);
+    const HC = ['FF4338CA', 'FF7C3AED', 'FF4338CA', 'FF7C3AED', 'FF0E7490', 'FFBE185D'];
+    for (let c = 1; c <= N; c++) { const bg = c <= 5 ? 'FF312E81' : HC[Math.floor((c - 6) / 2)]; [5, 6].forEach(r => sty(ws.getCell(r, c), {bg, bold:true, color:'FFFFFFFF', size:c <= 5 ? 10 : 9.5})); }
+    let r = 7;
+    R.forEach((g, gi) => {
+      const r0 = r;
+      g.rows.forEach((x, k) => {
+        const row = ws.getRow(r++); row.height = 20;
+        row.values = ['', '', '', x.d, x.c, ...x.sh.flatMap(v => [v.r, v.s]), x.tr, x.ts, x.tg, x.ac];
+        for (let c = 4; c <= N; c++) { const cell = row.getCell(c); let bg = 'FFFFFFFF', bold = false, color;
+          if (c === 4) { bg = 'FFE0F2FE'; bold = true; }
+          else if (c === 5) { bg = 'FF' + (TINT[x.c] || 'EEF2FF'); bold = true; color = 'FF' + col(x.c).slice(1).toUpperCase(); }
+          else if (c < 6 + SH.length * 2) bg = (c - 6) % 2 ? 'FFFEF9C3' : 'FFDCFCE7';
+          else if (c < 8 + SH.length * 2) { bg = 'FFEDE9FE'; bold = true; }
+          else { bg = c === N ? 'FFD1FAE5' : 'FFFFEDD5'; bold = true; }
+          sty(cell, {bg, bold, color}); if (c >= 8 + SH.length * 2) cell.numFmt = '#,##0'; }
+      });
+      const tr = ws.getRow(r++); tr.height = 22; tr.values = ['', '', '', 'TOTAL', '', ...g.tot.sh.flatMap(v => [v.r, v.s]), g.tot.tr, g.tot.ts, g.tot.tg, g.tot.ac];
+      ws.mergeCells(tr.number, 4, tr.number, 5);
+      for (let c = 4; c <= N; c++) { sty(tr.getCell(c), {bg:'FFC7D2FE', bold:true, color:'FF312E81', size:10}); if (c >= 8 + SH.length * 2) tr.getCell(c).numFmt = '#,##0'; }
+      for (let c = 1; c <= 3; c++) ws.mergeCells(r0, c, r - 1, c);
+      for (let d = 0; d < S.cfg.dates.length; d++) ws.mergeCells(r0 + d * NC, 4, r0 + d * NC + NC - 1, 4);
+      sty(ws.getCell(r0, 1), {bg:'FFE0E7FF', bold:true, color:'FF312E81', size:12});
+      sty(ws.getCell(r0, 2), {bg:'FFEEF2FF', al:'left'});
+      ws.getCell(r0, 2).value = {richText:[{text:(g.school || '—') + '\n', font:{name:'Arial', size:10, bold:true, color:{argb:'FF312E81'}}}, {text:'Updated: ' + fmtTs(g.upd), font:{name:'Arial', size:7, italic:true, color:{argb:'FF64748B'}}}]};
+      sty(ws.getCell(r0, 3), {bg:'FFEEF2FF', bold:true, color:'FF312E81', size:10});
+      ws.getCell(r0, 1).value = gi + 1; ws.getCell(r0, 3).value = g.code;
+    });
+    const gt = ws.getRow(r); gt.height = 26; gt.values = ['GRAND TOTAL (ALL SCHOOLS)', '', '', '', '', ...G.sh.flatMap(v => [v.r, v.s]), G.tr, G.ts, G.tg, G.ac];
+    ws.mergeCells(r, 1, r, 5);
+    for (let c = 1; c <= N; c++) { sty(gt.getCell(c), {bg:'FF312E81', bold:true, color:'FFFFFFFF', size:11, al:c === 1 ? 'right' : 'center'}); if (c >= 8 + SH.length * 2) gt.getCell(c).numFmt = '#,##0'; }
+    const name = 'School-wise-Ticket-Report.xlsx';
+    dl(new Blob([await wb.xlsx.writeBuffer()], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}), name);
+    wait(false); done('Excel report exported!', name + (lg ? '' : ' (logo not embedded: add logo.png to your GitHub repo)'));
+  } catch (e) { wait(false); toast(e.message || 'Export failed', false); }
+}
+
+async function exportSchoolPdf() {
+  const R = schoolReport(); if (!R.length) return toast('No school data to export yet.', false);
+  wait(true, 'Preparing PDF report');
+  try {
+    await lib(JSPDF); await lib(ATBL); const lg = await logoData();
+    const SH = S.cfg.shifts, CT = S.cfg.categories, NC = CT.length, G = grandTot(R);
+    const {jsPDF} = window.jspdf, doc = new jsPDF({unit:'pt', format:'a4', orientation:'landscape'}), W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
+    const lh = 46, lw = lg ? Math.min(80, lh * lg.ratio) : 0, tx = 36 + (lg ? lw + 12 : 0), drawn = new Set();
+    const header = () => { const p = doc.internal.getCurrentPageInfo().pageNumber; if (drawn.has(p)) return; drawn.add(p);
+      if (lg) doc.addImage(lg.url, lg.fmt, 36, 18, lw, lh);
+      doc.setFont('helvetica', 'bold').setFontSize(18).setTextColor(49, 46, 129).text('School-wise Ticket Report', tx, 40);
+      doc.setFont('helvetica', 'normal').setFontSize(8.5).setTextColor(71, 85, 105).text(`Tickets Received / Sale by shift  ·  Amount Target / Achieved (Rs.)  ·  ${R.length} schools`, tx, 56);
+      doc.setFontSize(8).setTextColor(100, 116, 139).text('Generated: ' + stamp(), W - 36, 28, {align:'right'});
+      doc.setFillColor(79, 70, 229).rect(36, 70, W - 72, 3, 'F'); doc.setFillColor(236, 72, 153).rect(W - 170, 70, 134, 3, 'F'); };
+    const widths = [24, 118, 52, 54, 52, ...SH.flatMap(() => [34, 34]), 34, 34, 50, 50], cs = {}; widths.forEach((w, i) => cs[i] = {cellWidth:w, halign:i === 1 ? 'left' : 'center'});
+    const hcol = [[67, 56, 202], [124, 58, 237], [67, 56, 202], [124, 58, 237], [14, 116, 144], [190, 24, 93]];
+    const head = [[{content:'S/N', rowSpan:2}, {content:'SCHOOL NAME', rowSpan:2}, {content:'USER\n(CODE)', rowSpan:2}, {content:'DATE', rowSpan:2}, {content:'CATEGORY', rowSpan:2}, ...SH.map(h => ({content:shLabel(h), colSpan:2})), {content:'TOTAL', colSpan:2}, {content:'AMOUNT (Rs.)', colSpan:2}],
+      [...SH.flatMap(() => ['Rec.', 'Sale']), 'Rec.', 'Sale', 'Target', 'Achieved']];
+    const shade = ci => ci < 5 ? null : ci < 5 + SH.length * 2 ? ((ci - 5) % 2 ? [254, 249, 195] : [220, 252, 231]) : ci < 7 + SH.length * 2 ? [237, 233, 254] : ci === widths.length - 1 ? [209, 250, 229] : [255, 237, 213];
+    const common = {theme:'grid', margin:{top:88, left:36, right:36, bottom:44}, tableWidth:'wrap', pageBreak:'avoid', rowPageBreak:'avoid', columnStyles:cs, didDrawPage:header,
+      styles:{font:'helvetica', fontSize:7, cellPadding:2, lineColor:[203, 213, 225], lineWidth:.4, valign:'middle', halign:'center', textColor:[30, 41, 59], minCellHeight:13},
+      headStyles:{textColor:255, fontStyle:'bold', fontSize:7.5, fillColor:[67, 56, 202]}};
+    let y = 88, onTop = true;
+    R.forEach((g, gi) => {
+      const need = (g.rows.length + 1) * 13.5 + (onTop ? 32 : 0) + 6;
+      if (!onTop && y + need > H - 44) { doc.addPage(); y = 88; onTop = true; }
+      const T = g.rows.length, body = [];
+      g.rows.forEach((x, k) => { const row = [];
+        if (k === 0) {
+          row.push({content:String(gi + 1), rowSpan:T + 1, styles:{fontStyle:'bold', fontSize:9, fillColor:[224, 231, 255], textColor:[49, 46, 129]}});
+          row.push({content:g.school || '—', rowSpan:T + 1, upd:fmtTs(g.upd), styles:{fontStyle:'bold', fontSize:8, halign:'left', fillColor:[238, 242, 255], textColor:[49, 46, 129]}});
+          row.push({content:g.code, rowSpan:T + 1, styles:{fontStyle:'bold', fillColor:[238, 242, 255], textColor:[49, 46, 129]}}); }
+        if (k % NC === 0) row.push({content:x.d, rowSpan:NC, styles:{fontStyle:'bold', fillColor:[224, 242, 254]}});
+        row.push({content:x.c, styles:{fontStyle:'bold', textColor:hexRgb(col(x.c)), fillColor:hexRgb(TINT[x.c] || 'EEF2FF')}});
+        x.sh.forEach(v => row.push(String(v.r), String(v.s))); row.push(String(x.tr), String(x.ts), fmtN(x.tg), fmtN(x.ac)); body.push(row); });
+      body.push([{content:'TOTAL', colSpan:2, styles:{fontStyle:'bold'}}, ...g.tot.sh.flatMap(v => [String(v.r), String(v.s)]), String(g.tot.tr), String(g.tot.ts), fmtN(g.tot.tg), fmtN(g.tot.ac)]);
+      doc.autoTable({...common, head, body, startY:y, showHead:onTop ? 'firstPage' : 'never',
+        didParseCell:d => {
+          if (d.section === 'head') { const c = d.column.index; d.cell.styles.fillColor = c < 5 ? [49, 46, 129] : hcol[Math.floor((c - 5) / 2)]; return; }
+          if (d.row.index === T) { d.cell.styles.fillColor = [199, 210, 254]; d.cell.styles.fontStyle = 'bold'; d.cell.styles.textColor = [49, 46, 129]; return; }
+          const sh = shade(d.column.index); if (sh) { d.cell.styles.fillColor = sh; if (d.column.index >= 5 + SH.length * 2) d.cell.styles.fontStyle = 'bold'; } },
+        didDrawCell:d => { if (d.section === 'body' && d.column.index === 1 && d.cell.raw && d.cell.raw.upd) doc.setFont('helvetica', 'italic').setFontSize(6).setTextColor(100, 116, 139).text('Updated: ' + d.cell.raw.upd, d.cell.x + 3, d.cell.y + d.cell.height - 4); } });
+      y = doc.lastAutoTable.finalY + 10; onTop = false;
+    });
+    if (y + 24 > H - 44) { doc.addPage(); y = 88; }
+    doc.autoTable({...common, startY:y, showHead:'never', head, body:[[{content:`GRAND TOTAL (${R.length} SCHOOLS)`, colSpan:5, styles:{halign:'right'}}, ...G.sh.flatMap(v => [String(v.r), String(v.s)]), String(G.tr), String(G.ts), fmtN(G.tg), fmtN(G.ac)]],
+      bodyStyles:{fillColor:[49, 46, 129], textColor:255, fontStyle:'bold', fontSize:8}});
+    const n = doc.getNumberOfPages();
+    for (let i = 1; i <= n; i++) { doc.setPage(i); header(); doc.setFont('helvetica', 'normal').setFontSize(8).setTextColor(100, 116, 139); doc.text('DAV Ticket Stock Manager · Rec. = Received', 36, H - 22); doc.text(`Page ${i} of ${n}`, W - 36, H - 22, {align:'right'}); }
+    const name = 'School-wise-Ticket-Report.pdf'; doc.save(name);
+    wait(false); done('PDF report exported!', name + (lg ? '' : ' (logo not embedded: add logo.png to your GitHub repo)'));
   } catch (e) { wait(false); toast(e.message || 'Export failed', false); }
 }
 
