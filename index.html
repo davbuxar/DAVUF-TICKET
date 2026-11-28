@@ -652,7 +652,7 @@ function grandTot(R) {
 }
 function schoolReportCard() {
   const R = schoolReport(), SH = S.cfg.shifts, NC = S.cfg.categories.length, G = grandTot(R);
-  const rs = (r, s) => `<span class="rs2"><span class="rv">Received = ${r}</span><span class="sv">Sale = ${s}</span></span>`;
+  const rs = (r, s) => !num(r) ? '' : `<span class="rs2"><span class="rv">Received = ${r}</span><span class="sv">Sale = ${s}</span></span>`;
   const cards = R.map((g, i) => { const pct = g.tot.tg ? Math.round(g.tot.ac * 100 / g.tot.tg) : 0;
     return `<div class="sc" data-code="${esc(g.code)}" data-q="${esc((g.school + ' ' + g.code).toLowerCase())}">
      <div class="sch"><span class="no">${i + 1}</span><div class="si"><b><a class="slink" data-sc="${esc(g.code)}">${esc(g.school || '—')}</a></b><small>User / School code: <b>${esc(g.code)}</b></small></div><span class="pill">${pct}% achieved</span></div>
@@ -700,7 +700,7 @@ async function exportSchoolXlsx() {
       const r0 = r;
       g.rows.forEach((x, k) => {
         const row = ws.getRow(r++); row.height = 20;
-        row.values = ['', '', '', x.d, x.c, ...x.sh.flatMap(v => [v.r, v.s]), x.tr, x.ts, x.tg, x.ac];
+        row.values = ['', '', '', x.d, x.c, ...x.sh.flatMap(v => v.r ? [v.r, v.s] : ['', '']), ...(x.tr ? [x.tr, x.ts] : ['', '']), x.tg, x.ac];
         for (let c = 4; c <= N; c++) { const cell = row.getCell(c); let bg = 'FFFFFFFF', bold = false, color;
           if (c === 4) { bg = 'FFE0F2FE'; bold = true; }
           else if (c === 5) { bg = 'FF' + (TINT[x.c] || 'EEF2FF'); bold = true; color = 'FF' + col(x.c).slice(1).toUpperCase(); }
@@ -709,7 +709,7 @@ async function exportSchoolXlsx() {
           else { bg = c === N ? 'FFD1FAE5' : 'FFFFEDD5'; bold = true; }
           sty(cell, {bg, bold, color}); if (c >= 8 + SH.length * 2) cell.numFmt = '#,##0'; }
       });
-      const tr = ws.getRow(r++); tr.height = 22; tr.values = ['', '', '', 'TOTAL', '', ...g.tot.sh.flatMap(v => [v.r, v.s]), g.tot.tr, g.tot.ts, g.tot.tg, g.tot.ac];
+      const tr = ws.getRow(r++); tr.height = 22; tr.values = ['', '', '', 'TOTAL', '', ...g.tot.sh.flatMap(v => v.r ? [v.r, v.s] : ['', '']), ...(g.tot.tr ? [g.tot.tr, g.tot.ts] : ['', '']), g.tot.tg, g.tot.ac];
       ws.mergeCells(tr.number, 4, tr.number, 5);
       for (let c = 4; c <= N; c++) { sty(tr.getCell(c), {bg:'FFC7D2FE', bold:true, color:'FF312E81', size:10}); if (c >= 8 + SH.length * 2) tr.getCell(c).numFmt = '#,##0'; }
       for (let c = 1; c <= 3; c++) ws.mergeCells(r0, c, r - 1, c);
@@ -763,8 +763,8 @@ async function exportSchoolPdf() {
           row.push({content:g.code, rowSpan:T + 1, styles:{fontStyle:'bold', fillColor:[238, 242, 255], textColor:[49, 46, 129]}}); }
         if (k % NC === 0) row.push({content:x.d, rowSpan:NC, styles:{fontStyle:'bold', fillColor:[224, 242, 254]}});
         row.push({content:x.c, styles:{fontStyle:'bold', textColor:hexRgb(col(x.c)), fillColor:hexRgb(TINT[x.c] || 'EEF2FF')}});
-        x.sh.forEach(v => row.push(String(v.r), String(v.s))); row.push(String(x.tr), String(x.ts), fmtN(x.tg), fmtN(x.ac)); body.push(row); });
-      body.push([{content:'TOTAL', colSpan:2, styles:{fontStyle:'bold'}}, ...g.tot.sh.flatMap(v => [String(v.r), String(v.s)]), String(g.tot.tr), String(g.tot.ts), fmtN(g.tot.tg), fmtN(g.tot.ac)]);
+        x.sh.forEach(v => row.push(v.r ? String(v.r) : '', v.r ? String(v.s) : '')); row.push(x.tr ? String(x.tr) : '', x.tr ? String(x.ts) : '', fmtN(x.tg), fmtN(x.ac)); body.push(row); });
+      body.push([{content:'TOTAL', colSpan:2, styles:{fontStyle:'bold'}}, ...g.tot.sh.flatMap(v => v.r ? [String(v.r), String(v.s)] : ['', '']), ...(g.tot.tr ? [String(g.tot.tr), String(g.tot.ts)] : ['', '']), fmtN(g.tot.tg), fmtN(g.tot.ac)]);
       doc.autoTable({...common, head, body, startY:y, showHead:onTop ? 'firstPage' : 'never',
         didParseCell:d => {
           if (d.section === 'head') { const c = d.column.index; d.cell.styles.fillColor = c < 5 ? [49, 46, 129] : hcol[Math.floor((c - 5) / 2)]; return; }
