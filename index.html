@@ -142,7 +142,7 @@ body{background:radial-gradient(900px 400px at 0 0,rgba(99,102,241,.16),transpar
 .mh{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;padding:16px;border-radius:20px;color:#fff;background:linear-gradient(120deg,#4338ca,#7c3aed,#db2777)}.mh h2{font-size:17px}.mh small{opacity:.92;font-size:11.5px}
 .slink{cursor:pointer;color:var(--p);text-decoration:underline dotted;text-underline-offset:3px}.slink:hover{filter:brightness(1.2)}
 @media(max-width:700px){.sbox{margin:0;border-radius:0;min-height:100vh}}
-</style>
+.sch .slink,.sch b{color:#fff!important;text-shadow:0 1px 3px rgba(0,0,0,.35)}.sch .si b{font-size:15px}.rs2{display:flex;flex-direction:column;gap:1px;align-items:flex-start;padding-left:6px;font-size:11px;line-height:1.35;white-space:nowrap}.rt td .rs2 .rv,.rt td .rs2 .sv{font-weight:700}</style>
 </head>
 <body>
 
@@ -652,12 +652,12 @@ function grandTot(R) {
 }
 function schoolReportCard() {
   const R = schoolReport(), SH = S.cfg.shifts, NC = S.cfg.categories.length, G = grandTot(R);
-  const rs = (r, s) => `<span class="rv">${r}</span><span class="sl">/</span><span class="sv">${s}</span>`;
+  const rs = (r, s) => `<span class="rs2"><span class="rv">Received = ${r}</span><span class="sv">Sale = ${s}</span></span>`;
   const cards = R.map((g, i) => { const pct = g.tot.tg ? Math.round(g.tot.ac * 100 / g.tot.tg) : 0;
     return `<div class="sc" data-code="${esc(g.code)}" data-q="${esc((g.school + ' ' + g.code).toLowerCase())}">
      <div class="sch"><span class="no">${i + 1}</span><div class="si"><b><a class="slink" data-sc="${esc(g.code)}">${esc(g.school || '—')}</a></b><small>User / School code: <b>${esc(g.code)}</b></small></div><span class="pill">${pct}% achieved</span></div>
      <div class="upd">Updated: ${fmtTs(g.upd)}</div>
-     <div class="tw"><table class="rt"><thead><tr><th>Date</th><th>Category</th>${SH.map(h => `<th>${esc(shLabel(h))}<br><small>Rec / Sale</small></th>`).join('')}<th>Total<br><small>Rec / Sale</small></th><th>Amount<br><small>Target / Achieved</small></th></tr></thead><tbody>
+     <div class="tw"><table class="rt"><thead><tr><th>Date</th><th>Category</th>${SH.map(h => `<th>${esc(shLabel(h))}<br><small>Received &amp; Sale</small></th>`).join('')}<th>Total<br><small>Received &amp; Sale</small></th><th>Amount<br><small>Target / Achieved</small></th></tr></thead><tbody>
      ${g.rows.map((r, k) => `<tr>${k % NC === 0 ? `<td class="c-d" rowspan="${NC}">${r.d}</td>` : ''}<td>${chip(r.c)}</td>${r.sh.map(x => `<td>${rs(x.r, x.s)}</td>`).join('')}<td class="c-k">${rs(r.tr, r.ts)}</td><td class="c-a">${INR(r.tg)} / <b>${INR(r.ac)}</b></td></tr>`).join('')}
      </tbody><tfoot><tr><td colspan="2">TOTAL</td>${g.tot.sh.map(x => `<td>${rs(x.r, x.s)}</td>`).join('')}<td>${rs(g.tot.tr, g.tot.ts)}</td><td>${INR(g.tot.tg)} / ${INR(g.tot.ac)}</td></tr></tfoot></table></div></div>`; }).join('');
   return `<div class="card"><h2>🏫 School-wise report <span class="sp"></span><button class="btn xl" data-x="rxlsx|r" style="padding:8px 14px">📗 Excel</button><button class="btn pdf" data-x="rpdf|r" style="padding:8px 14px">📕 PDF</button></h2>
@@ -743,10 +743,10 @@ async function exportSchoolPdf() {
       doc.setFont('helvetica', 'normal').setFontSize(8.5).setTextColor(71, 85, 105).text(`Tickets Received / Sale by shift  ·  Amount Target / Achieved (Rs.)  ·  ${R.length} schools`, tx, 56);
       doc.setFontSize(8).setTextColor(100, 116, 139).text('Generated: ' + stamp(), W - 36, 28, {align:'right'});
       doc.setFillColor(79, 70, 229).rect(36, 70, W - 72, 3, 'F'); doc.setFillColor(236, 72, 153).rect(W - 170, 70, 134, 3, 'F'); };
-    const widths = [24, 118, 52, 54, 52, ...SH.flatMap(() => [34, 34]), 34, 34, 50, 50], cs = {}; widths.forEach((w, i) => cs[i] = {cellWidth:w, halign:i === 1 ? 'left' : 'center'});
+    const widths = [24, 96, 48, 52, 50, ...SH.flatMap(() => [40, 40]), 40, 40, 48, 48], cs = {}; widths.forEach((w, i) => cs[i] = {cellWidth:w, halign:i === 1 ? 'left' : 'center'});
     const hcol = [[67, 56, 202], [124, 58, 237], [67, 56, 202], [124, 58, 237], [14, 116, 144], [190, 24, 93]];
     const head = [[{content:'S/N', rowSpan:2}, {content:'SCHOOL NAME', rowSpan:2}, {content:'USER\n(CODE)', rowSpan:2}, {content:'DATE', rowSpan:2}, {content:'CATEGORY', rowSpan:2}, ...SH.map(h => ({content:shLabel(h), colSpan:2})), {content:'TOTAL', colSpan:2}, {content:'AMOUNT (Rs.)', colSpan:2}],
-      [...SH.flatMap(() => ['Rec.', 'Sale']), 'Rec.', 'Sale', 'Target', 'Achieved']];
+      [...SH.flatMap(() => ['Received', 'Sale']), 'Received', 'Sale', 'Target', 'Achieved']];
     const shade = ci => ci < 5 ? null : ci < 5 + SH.length * 2 ? ((ci - 5) % 2 ? [254, 249, 195] : [220, 252, 231]) : ci < 7 + SH.length * 2 ? [237, 233, 254] : ci === widths.length - 1 ? [209, 250, 229] : [255, 237, 213];
     const common = {theme:'grid', margin:{top:88, left:36, right:36, bottom:44}, tableWidth:'wrap', pageBreak:'avoid', rowPageBreak:'avoid', columnStyles:cs, didDrawPage:header,
       styles:{font:'helvetica', fontSize:7, cellPadding:2, lineColor:[203, 213, 225], lineWidth:.4, valign:'middle', halign:'center', textColor:[30, 41, 59], minCellHeight:13},
@@ -777,7 +777,7 @@ async function exportSchoolPdf() {
     doc.autoTable({...common, startY:y, showHead:'never', head, body:[[{content:`GRAND TOTAL (${R.length} SCHOOLS)`, colSpan:5, styles:{halign:'right'}}, ...G.sh.flatMap(v => [String(v.r), String(v.s)]), String(G.tr), String(G.ts), fmtN(G.tg), fmtN(G.ac)]],
       bodyStyles:{fillColor:[49, 46, 129], textColor:255, fontStyle:'bold', fontSize:8}});
     const n = doc.getNumberOfPages();
-    for (let i = 1; i <= n; i++) { doc.setPage(i); header(); doc.setFont('helvetica', 'normal').setFontSize(8).setTextColor(100, 116, 139); doc.text('DAV Ticket Stock Manager · Rec. = Received', 36, H - 22); doc.text(`Page ${i} of ${n}`, W - 36, H - 22, {align:'right'}); }
+    for (let i = 1; i <= n; i++) { doc.setPage(i); header(); doc.setFont('helvetica', 'normal').setFontSize(8).setTextColor(100, 116, 139); doc.text('DAV Ticket Stock Manager', 36, H - 22); doc.text(`Page ${i} of ${n}`, W - 36, H - 22, {align:'right'}); }
     const name = 'School-wise-Ticket-Report.pdf'; doc.save(name);
     wait(false); done('PDF report exported!', name + (lg ? '' : ' (logo not embedded: add logo.png to your GitHub repo)'));
   } catch (e) { wait(false); toast(e.message || 'Export failed', false); }
